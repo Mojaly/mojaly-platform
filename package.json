@@ -1,0 +1,19 @@
+{
+  "name": "mojaly-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mojaly platform monorepo for unified fintech payment routing using Interledger, Rafiki, and hosted partner adapters.",
+  "scripts": {
+    "lint": "echo \"No lint configured yet\"",
+    "test": "echo \"No tests configured yet\"",
+    "dev": "echo \"Services will be added gradually\""
+  },
+  "keywords": [
+    "mojaly",
+    "interledger",
+    "rafiki",
+    "open-payments",
+    "payments"
+  ],
+  "license": "UNLICENSED"
+}

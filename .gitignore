@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+coverage/
+.turbo/
+.vite/
+.next/
+logs/
+*.log
+Dockerfile.local
+tmp/

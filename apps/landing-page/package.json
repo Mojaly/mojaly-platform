@@ -1,0 +1,15 @@
+{
+  "name": "@mojaly/landing-page",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mojaly public marketing landing page.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
+  }
+}

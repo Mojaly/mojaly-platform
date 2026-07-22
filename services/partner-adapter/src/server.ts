@@ -6,6 +6,7 @@ const start = async () => {
   try {
     await app.listen({
       port: 4005,
+      host:'0.0.0.0'
     })
   } catch (err) {
     app.log.error(err)

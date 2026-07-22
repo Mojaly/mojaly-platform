@@ -1,0 +1,76 @@
+import { randomUUID } from 'node:crypto'
+import { getPartner } from '../partners/partner-registry.js'
+import type { CreatePayoutInput } from './payouts.schemas.js'
+import type { Payout } from './payout.types.js'
+import {
+  getPayoutById,
+  listPayouts,
+  savePayout,
+  updatePayout
+} from './payouts.store.js'
+
+export async function createPayout(input: CreatePayoutInput): Promise<Payout> {
+  const now = new Date().toISOString()
+
+  const payout: Payout = {
+    id: randomUUID(),
+    paymentId: input.paymentId,
+    partnerCode: input.partnerCode,
+    amount: input.amount,
+    assetCode: input.assetCode,
+    assetScale: input.assetScale,
+    destinationType: input.destinationType,
+    destinationAccount: input.destinationAccount,
+    reference: input.reference,
+    status: 'RECEIVED',
+    createdAt: now,
+    updatedAt: now
+  }
+
+  if (input.destinationBankCode) {
+    payout.destinationBankCode = input.destinationBankCode
+  }
+
+  if (input.customerName) {
+    payout.customerName = input.customerName
+  }
+
+  savePayout(payout)
+
+  const partner = getPartner(input.partnerCode)
+
+  if (!partner) {
+    return (
+      updatePayout(payout.id, {
+        status: 'FAILED',
+        failureReason: `Partner ${input.partnerCode} is not registered`
+      }) ?? payout
+    )
+  }
+
+  const submittedPayout =
+    updatePayout(payout.id, {
+      status: 'SUBMITTED_TO_PARTNER'
+    }) ?? payout
+
+    const partnerResult = await partner.createPayout(submittedPayout)
+
+    const partnerUpdates: Partial<Omit<Payout, 'id' | 'createdAt'>> = {
+    status: partnerResult.status,
+    partnerReference: partnerResult.partnerReference
+    }
+
+    if (partnerResult.failureReason) {
+    partnerUpdates.failureReason = partnerResult.failureReason
+    }
+
+    return updatePayout(payout.id, partnerUpdates) ?? payout
+}
+
+export function findPayout(id: string): Payout | undefined {
+  return getPayoutById(id)
+}
+
+export function findPayouts(): Payout[] {
+  return listPayouts()
+}

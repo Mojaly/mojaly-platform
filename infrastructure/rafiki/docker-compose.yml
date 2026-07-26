@@ -1,0 +1,194 @@
+name: mojaly-rafiki
+
+services:
+  rafiki-auth:
+    image: ghcr.io/interledger/rafiki-auth:${RAFIKI_VERSION}
+    container_name: mojaly-rafiki-auth
+    environment:
+      ADMIN_API_SECRET: ${AUTH_ADMIN_API_SECRET}
+      OPERATOR_TENANT_ID: ${OPERATOR_TENANT_ID}
+      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL}
+      AUTH_SERVER_URL: ${AUTH_SERVER_URL}
+      ADMIN_PORT: ${AUTH_ADMIN_PORT}
+      AUTH_PORT: ${AUTH_PORT}
+      INTROSPECTION_PORT: ${INTROSPECTION_PORT}
+      INTERACTION_PORT: ${INTERACTION_PORT}
+      SERVICE_API_PORT: ${SERVICE_API_PORT}
+      COOKIE_KEY: ${COOKIE_KEY}
+      IDENTITY_SERVER_SECRET: ${IDENTITY_SERVER_SECRET}
+      IDENTITY_SERVER_URL: ${IDENTITY_SERVER_URL}
+      REDIS_URL: ${REDIS_URL}
+      TRUST_PROXY: ${TRUST_PROXY}
+      LOG_LEVEL: ${LOG_LEVEL}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - rafiki
+    ports:
+      - "${AUTH_ADMIN_PORT}:${AUTH_ADMIN_PORT}"
+      - "${AUTH_PORT}:${AUTH_PORT}"
+      - "${INTROSPECTION_PORT}:${INTROSPECTION_PORT}"
+      - "${INTERACTION_PORT}:${INTERACTION_PORT}"
+      - "${SERVICE_API_PORT}:${SERVICE_API_PORT}"
+    restart: always
+
+  rafiki-backend:
+    image: ghcr.io/interledger/rafiki-backend:${RAFIKI_VERSION}
+    container_name: mojaly-rafiki-backend
+    depends_on:
+      - postgres
+      - redis
+      - tigerbeetle
+    environment:
+      ADMIN_API_SECRET: ${BACKEND_ADMIN_API_SECRET}
+      OPERATOR_TENANT_ID: ${OPERATOR_TENANT_ID}
+      AUTH_SERVICE_API_URL: ${AUTH_SERVICE_API_URL}
+      AUTH_SERVER_GRANT_URL: ${AUTH_SERVER_GRANT_URL}
+      AUTH_SERVER_INTROSPECTION_URL: ${AUTH_SERVER_INTROSPECTION_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      ILP_ADDRESS: ${ILP_ADDRESS}
+      ILP_CONNECTOR_URL: ${ILP_CONNECTOR_URL}
+      OPEN_PAYMENTS_URL: ${OPEN_PAYMENTS_URL}
+      WALLET_ADDRESS_URL: ${WALLET_ADDRESS_URL}
+      EXCHANGE_RATES_URL: ${EXCHANGE_RATES_URL}
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      INSTANCE_NAME: ${INSTANCE_NAME}
+      TRUST_PROXY: ${TRUST_PROXY}
+      LOG_LEVEL: ${LOG_LEVEL}
+      NODE_ENV: ${NODE_ENV}
+      KEY_ID: ${KEY_ID}
+      USE_TIGERBEETLE: ${USE_TIGERBEETLE}
+      TIGERBEETLE_CLUSTER_ID: ${TIGERBEETLE_CLUSTER_ID}
+      TIGERBEETLE_REPLICA_ADDRESSES: ${TIGERBEETLE_REPLICA_ADDRESSES}
+      ADMIN_PORT: ${BACKEND_ADMIN_PORT}
+      CONNECTOR_PORT: ${CONNECTOR_PORT}
+      OPEN_PAYMENTS_PORT: ${OPEN_PAYMENTS_PORT}
+    networks:
+      - rafiki
+    ports:
+      - "${OPEN_PAYMENTS_PORT}:${OPEN_PAYMENTS_PORT}"
+      - "${BACKEND_ADMIN_PORT}:${BACKEND_ADMIN_PORT}"
+      - "${CONNECTOR_PORT}:${CONNECTOR_PORT}"
+    privileged: true
+    restart: always
+    volumes:
+      - ../temp/:/workspace/temp/
+
+  rafiki-frontend:
+    image: ghcr.io/interledger/rafiki-frontend:${RAFIKI_VERSION}
+    container_name: mojaly-rafiki-frontend
+    depends_on:
+      - rafiki-backend
+      - kratos
+    environment:
+      PORT: ${FRONTEND_PORT}
+      GRAPHQL_URL: ${GRAPHQL_URL}
+      OPEN_PAYMENTS_URL: ${FRONTEND_OPEN_PAYMENTS_URL}
+      AUTH_ENABLED: ${AUTH_ENABLED}
+      KRATOS_CONTAINER_PUBLIC_URL: ${KRATOS_CONTAINER_PUBLIC_URL}
+      KRATOS_BROWSER_PUBLIC_URL: ${KRATOS_BROWSER_PUBLIC_URL}
+      KRATOS_ADMIN_URL: ${KRATOS_ADMIN_URL}
+      ENABLE_INSECURE_MESSAGE_COOKIE: ${ENABLE_INSECURE_MESSAGE_COOKIE}
+      LOG_LEVEL: ${LOG_LEVEL}
+      NODE_ENV: ${NODE_ENV}
+    networks:
+      - rafiki
+    restart: always
+    privileged: true
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+
+  tigerbeetle:
+    image: ${TIGERBEETLE_IMAGE}
+    container_name: mojaly-rafiki-tigerbeetle
+    privileged: true
+    volumes:
+      - tigerbeetle-data:/var/lib/tigerbeetle
+    networks:
+      rafiki:
+        ipv4_address: ${TIGERBEETLE_IP}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -ex
+        DATA_FILE=/var/lib/tigerbeetle/cluster_0_replica_0.tigerbeetle
+        set +e
+        ls $$DATA_FILE
+        DATA_FILE_EXISTS="$$?"
+        set -e
+        echo $$DATA_FILE_EXISTS
+        if [ "$$DATA_FILE_EXISTS" != 0 ]; then
+          ./tigerbeetle format --cluster=0 --replica=0 --replica-count=1 $$DATA_FILE;
+        fi
+        hostname -i
+        ls /var/lib/tigerbeetle
+        ./tigerbeetle start --addresses=0.0.0.0:${TIGERBEETLE_PORT} $$DATA_FILE
+
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    container_name: mojaly-rafiki-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - rafiki
+    restart: unless-stopped
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./dbinit.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: ${REDIS_IMAGE}
+    container_name: mojaly-rafiki-redis
+    restart: unless-stopped
+    networks:
+      - rafiki
+
+  kratos:
+    image: ${KRATOS_IMAGE}
+    container_name: mojaly-rafiki-kratos
+    privileged: true
+    depends_on:
+      - postgres
+    ports:
+      - "4433:4433"
+      - "4434:4434"
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./identity.schema.json:/etc/config/kratos/identity.schema.json
+      - ./kratos.yml:/etc/config/kratos/kratos.yml
+    entrypoint: ["/entrypoint.sh"]
+    networks:
+      - rafiki
+
+  nginx:
+    image: ${NGINX_IMAGE}
+    container_name: mojaly-rafiki-nginx
+    depends_on:
+      - rafiki-backend
+      - rafiki-auth
+      - rafiki-frontend
+      - kratos
+    ports:
+      - "${NGINX_HTTP_PORT}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - rafiki
+    restart: unless-stopped
+
+networks:
+  rafiki:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${RAFIKI_NETWORK_SUBNET}
+          gateway: ${RAFIKI_NETWORK_GATEWAY}
+
+volumes:
+  pg-data:
+  tigerbeetle-data:

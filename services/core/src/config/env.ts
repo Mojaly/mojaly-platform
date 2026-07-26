@@ -6,11 +6,11 @@ const envSchema = z.object({
     .enum(['development', 'test', 'production'])
     .default('development'),
 
-  PORT: z.coerce.number().int().positive().default(4010),
+  PORT: z.coerce.number().int().positive().default(5050),
 
   PARTNER_ADAPTER_URL: z
     .url()
-    .default('http://localhost:4005'),
+    .default('http://localhost:5070'),
 
   MOJALY_WALLET_ADDRESS_BASE_URL: z
   .url()

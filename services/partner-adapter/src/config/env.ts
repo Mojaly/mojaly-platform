@@ -6,15 +6,13 @@ const envSchema = z.object({
     .enum(['development', 'test', 'production'])
     .default('development'),
 
-  PORT: z.coerce.number().int().positive().default(4005),
+  PORT: z.coerce.number().int().positive().default(5070),
 
   KCB_BASE_URL: z
-    .string()
     .url()
     .default('https://uat.buni.kcbgroup.com/fundstransfer/1.0.0'),
 
   KCB_AUTH_URL: z
-    .string()
     .url()
     .default('https://accounts.buni.kcbgroup.com/oauth2'),
 

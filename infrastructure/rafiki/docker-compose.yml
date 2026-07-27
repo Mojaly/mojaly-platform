@@ -92,6 +92,7 @@ services:
       KRATOS_BROWSER_PUBLIC_URL: ${KRATOS_BROWSER_PUBLIC_URL}
       KRATOS_ADMIN_URL: ${KRATOS_ADMIN_URL}
       ENABLE_INSECURE_MESSAGE_COOKIE: ${ENABLE_INSECURE_MESSAGE_COOKIE}
+      SIGNATURE_VERSION: ${SIGNATURE_VERSION}
       LOG_LEVEL: ${LOG_LEVEL}
       NODE_ENV: ${NODE_ENV}
     networks:
@@ -175,8 +176,10 @@ services:
       - kratos
     ports:
       - "${NGINX_HTTP_PORT}:80"
+      - "${NGINX_HTTPS_PORT}:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
     networks:
       - rafiki
     restart: unless-stopped

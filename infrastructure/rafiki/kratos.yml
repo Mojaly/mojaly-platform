@@ -4,38 +4,38 @@ dsn: postgres://postgres:password@postgres:5432/mojaly_kratos?sslmode=disable&ma
 
 serve:
   public:
-    base_url: http://admin.mojaly.local/kratos/
+    base_url: https://admin.mojaly.local/kratos/
     cors:
       enabled: true
   admin:
     base_url: http://kratos:4434/
 
 selfservice:
-  default_browser_return_url: http://admin.mojaly.local/
+  default_browser_return_url: https://admin.mojaly.local/
   allowed_return_urls:
-    - http://admin.mojaly.local
+    - https://admin.mojaly.local
 
   methods:
     link:
       config:
         lifespan: 1h
-        base_url: http://admin.mojaly.local/kratos
+        base_url: https://admin.mojaly.local/kratos
       enabled: true
     password:
       enabled: true
 
   flows:
     error:
-      ui_url: http://admin.mojaly.local/error
+      ui_url: https://admin.mojaly.local/error
 
     settings:
-      ui_url: http://admin.mojaly.local/settings
+      ui_url: https://admin.mojaly.local/settings
       privileged_session_max_age: 15m
       required_aal: highest_available
 
     recovery:
       enabled: true
-      ui_url: http://admin.mojaly.local/auth/recovery
+      ui_url: https://admin.mojaly.local/auth/recovery
       use: link
       after:
         hooks:
@@ -46,10 +46,10 @@ selfservice:
 
     logout:
       after:
-        default_browser_return_url: http://admin.mojaly.local/auth
+        default_browser_return_url: https://admin.mojaly.local/auth
 
     login:
-      ui_url: http://admin.mojaly.local/auth/login
+      ui_url: https://admin.mojaly.local/auth/login
       lifespan: 10m
 
     registration:

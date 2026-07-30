@@ -1,0 +1,15 @@
+meta {
+  name: Get Payment Intent
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:5050/payment-intents/{{paymentIntentId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

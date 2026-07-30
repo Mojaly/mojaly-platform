@@ -1,0 +1,35 @@
+meta {
+  name: Create Destination Resolution
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5050/destination-resolutions
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "fintechId": "janjapay-01",
+    "destination": {
+      "type": "bank_account",
+      "country": "GB",
+      "account": "35890906",
+      "bankCode": "000000",
+      "name": "John Doe"
+    },
+    "amount": {
+      "value": "1000",
+      "assetCode": "GBP",
+      "assetScale": 2
+    },
+    "reference": "bruno-resolution-001"
+  }
+}

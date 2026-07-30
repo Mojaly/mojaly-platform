@@ -1,42 +1,14 @@
 import { randomUUID } from 'node:crypto'
-import { env } from '../../config/env.js'
 import type { CreateDestinationResolutionInput } from './destination-resolutions.schemas.js'
 import type {
   PaymentDestination,
   PaymentIntent
 } from '../payment-intents/payment-intent.types.js'
 import { savePaymentIntent } from '../payment-intents/payment-intent.store.js'
-
-function selectPartnerCode(input: CreateDestinationResolutionInput): string {
-  if (
-    input.destination.country === 'GB' &&
-    input.destination.type === 'bank_account'
-  ) {
-    return 'GRIFFIN'
-  }
-
-  if (
-    input.destination.country === 'KE' &&
-    input.destination.type === 'mobile_money'
-  ) {
-    return 'KCB'
-  }
-
-  if (
-    input.destination.country === 'KE' &&
-    input.destination.type === 'bank_account'
-  ) {
-    return 'KCB'
-  }
-
-  return 'UNKNOWN'
-}
-
-function createPartnerWalletAddress(partnerCode: string): string {
-  const partnerPath = partnerCode.toLowerCase()
-
-  return `${env.MOJALY_WALLET_ADDRESS_BASE_URL}/${partnerPath}`
-}
+import {
+  resolvePartnerRoute,
+  type ResolvePartnerRouteInput
+} from '../partner-routing/partner-routing.service.js'
 
 function getExpiresAt(): string {
   const expiresAt = new Date()
@@ -68,21 +40,37 @@ function createPaymentDestination(
   return destination
 }
 
+function createRouteInput(
+  input: CreateDestinationResolutionInput
+): ResolvePartnerRouteInput {
+  const routeInput: ResolvePartnerRouteInput = {
+    country: input.destination.country,
+    destinationType: input.destination.type,
+    assetCode: input.amount.assetCode
+  }
+
+  if (input.destination.network) {
+    routeInput.network = input.destination.network
+  }
+
+  return routeInput
+}
+
 export function createDestinationResolution(
   input: CreateDestinationResolutionInput
 ): PaymentIntent {
   const now = new Date().toISOString()
   const id = randomUUID()
-  const partnerCode = selectPartnerCode(input)
+  const route = resolvePartnerRoute(createRouteInput(input))
 
   const intent: PaymentIntent = {
     id,
     fintechId: input.fintechId,
-    partnerCode,
+    partnerCode: route.partner.adapterCode,
     destination: createPaymentDestination(input),
     amount: input.amount,
     reference: input.reference,
-    walletAddress: createPartnerWalletAddress(partnerCode),
+    walletAddress: route.walletAddress.walletAddressUrl,
     status: 'AWAITING_PAYMENT',
     createdAt: now,
     updatedAt: now,

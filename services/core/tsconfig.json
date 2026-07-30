@@ -12,7 +12,8 @@
     // "types": [],
     // For nodejs:
     "lib": ["esnext"],
-    "types": ["node"],
+    // Remove explicit "node" types here to avoid "Cannot find type definition file for 'node'"
+    // If you need Node types, install them with: npm install -D @types/node
     // and npm install -D @types/node
 
     // Other Outputs

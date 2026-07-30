@@ -1,0 +1,33 @@
+meta {
+  name: Griffin Webhook - Submission Delivered
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:5070/webhooks/griffin
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "event-url": "/v0/events/ev.mojaly-griffin-demo-001",
+    "event-type": "submission-updated",
+    "event-payload": {
+      "submission-url": "{{griffinSubmissionUrl}}",
+      "submission-status": "delivered",
+      "submission-scheme-information": {
+        "payment-scheme": "fps",
+        "scheme-status-code": "0000",
+        "scheme-status-code-description": "The payment was accepted by the scheme"
+      }
+    },
+    "created-at": "2026-07-30T12:00:00.000Z"
+  }
+}

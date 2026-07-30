@@ -1,0 +1,35 @@
+meta {
+  name: Create Destination Resolution - MTN Uganda
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:5050/destination-resolutions
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "fintechId": "janjapay-01",
+    "destination": {
+      "type": "mobile_money",
+      "country": "UG",
+      "network": "MTN",
+      "account": "46733123466",
+      "name": "MTN Sandbox User"
+    },
+    "amount": {
+      "value": "1000",
+      "assetCode": "UGX",
+      "assetScale": 2
+    },
+    "reference": "bruno-mtn-resolution-001"
+  }
+}

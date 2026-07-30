@@ -10,4 +10,5 @@ export interface PartnerPayoutResult {
 export interface PartnerAdapter {
   code: string
   createPayout(payout: Payout): Promise<PartnerPayoutResult>
+  getPayoutStatus?(payout: Payout): Promise<PartnerPayoutResult>
 }

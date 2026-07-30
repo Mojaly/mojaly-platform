@@ -1,0 +1,30 @@
+meta {
+  name: Create Safaricom B2C Payout
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:5070/payouts
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "paymentId": "pay_safaricom_bruno_001",
+    "partnerCode": "SAFARICOM_KE",
+    "amount": "1000",
+    "assetCode": "KES",
+    "assetScale": 2,
+    "destinationType": "mobile_money",
+    "destinationAccount": "254708374149",
+    "customerName": "M-Pesa Sandbox User",
+    "reference": "MOJALY SAFARICOM TEST"
+  }
+}

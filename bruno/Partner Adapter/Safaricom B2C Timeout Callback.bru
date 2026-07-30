@@ -1,0 +1,27 @@
+meta {
+  name: Safaricom B2C Timeout Callback
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://localhost:5070/webhooks/safaricom/b2c/timeout
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "Result": {
+      "ResultType": 1,
+      "ResultCode": 1,
+      "ResultDesc": "The request timed out before receiving a final result.",
+      "OriginatorConversationID": "{{safaricomOriginatorConversationId}}"
+    }
+  }
+}

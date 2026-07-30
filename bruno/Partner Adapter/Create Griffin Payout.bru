@@ -1,0 +1,31 @@
+meta {
+  name: Create Griffin Payout
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5070/payouts
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "paymentId": "pay_griffin_bruno_001",
+    "partnerCode": "GRIFFIN",
+    "amount": "1000",
+    "assetCode": "GBP",
+    "assetScale": 2,
+    "destinationType": "bank_account",
+    "destinationAccount": "35890906",
+    "destinationBankCode": "000000",
+    "customerName": "John Doe",
+    "reference": "MOJALY GRIFFIN TEST"
+  }
+}

@@ -35,9 +35,16 @@ export function updatePayout(
   return updated
 }
 
-
 export function getPayoutByReference(reference: string): Payout | undefined {
   return Array.from(payouts.values()).find(
     (payout) => payout.reference === reference
+  )
+}
+
+export function getPayoutByPartnerReference(
+  partnerReference: string
+): Payout | undefined {
+  return Array.from(payouts.values()).find(
+    (payout) => payout.partnerReference === partnerReference
   )
 }

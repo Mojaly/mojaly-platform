@@ -1,0 +1,30 @@
+meta {
+  name: Create MTN Uganda Payout
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:5070/payouts
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "paymentId": "pay_mtn_bruno_001",
+    "partnerCode": "MTN_UG",
+    "amount": "1000",
+    "assetCode": "EUR",
+    "assetScale": 2,
+    "destinationType": "mobile_money",
+    "destinationAccount": "46733123466",
+    "customerName": "MTN Sandbox User",
+    "reference": "MOJALY MTN TEST"
+  }
+}

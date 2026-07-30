@@ -27,6 +27,17 @@ const partners = new Map<string, RoutingPartner>([
       rafikiTenantId: '12d0d40f-0f7c-4a51-974b-d04debfe6a20',
       adapterCode: 'GRIFFIN'
     }
+  ],
+  [
+    'partner_safaricom_ke',
+    {
+      id: 'partner_safaricom_ke',
+      code: 'SAFARICOM_KE',
+      name: 'Safaricom M-Pesa Kenya',
+      status: 'ACTIVE',
+      rafikiTenantId: 'replace-with-safaricom-tenant-id',
+      adapterCode: 'SAFARICOM_KE'
+    }
   ]
 ])
 
@@ -53,6 +64,18 @@ const capabilities = new Map<string, PartnerCapability>([
       assetCode: 'GBP',
       status: 'ACTIVE'
     }
+  ],
+  [
+    'capability_safaricom_ke_mobile_money_kes',
+    {
+      id: 'capability_safaricom_ke_mobile_money_kes',
+      partnerId: 'partner_safaricom_ke',
+      country: 'KE',
+      destinationType: 'mobile_money',
+      network: 'SAFARICOM',
+      assetCode: 'KES',
+      status: 'ACTIVE'
+    }
   ]
 ])
 
@@ -75,6 +98,17 @@ const walletAddresses = new Map<string, PartnerWalletAddress>([
       partnerId: 'partner_griffin',
       capabilityId: 'capability_griffin_bank_gbp',
       walletAddressUrl: 'https://mojaly.local/griffin/settlement',
+      purpose: 'SETTLEMENT',
+      status: 'ACTIVE'
+    }
+  ],
+  [
+    'wallet_safaricom_ke_settlement',
+    {
+      id: 'wallet_safaricom_ke_settlement',
+      partnerId: 'partner_safaricom_ke',
+      capabilityId: 'capability_safaricom_ke_mobile_money_kes',
+      walletAddressUrl: 'https://mojaly.local/safaricom-ke/settlement',
       purpose: 'SETTLEMENT',
       status: 'ACTIVE'
     }

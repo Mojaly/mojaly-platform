@@ -53,18 +53,18 @@ export async function createPayout(input: CreatePayoutInput): Promise<Payout> {
       status: 'SUBMITTED_TO_PARTNER'
     }) ?? payout
 
-    const partnerResult = await partner.createPayout(submittedPayout)
+  const partnerResult = await partner.createPayout(submittedPayout)
 
-    const partnerUpdates: Partial<Omit<Payout, 'id' | 'createdAt'>> = {
+  const partnerUpdates: Partial<Omit<Payout, 'id' | 'createdAt'>> = {
     status: partnerResult.status,
     partnerReference: partnerResult.partnerReference
-    }
+  }
 
-    if (partnerResult.failureReason) {
+  if (partnerResult.failureReason) {
     partnerUpdates.failureReason = partnerResult.failureReason
-    }
+  }
 
-    return updatePayout(payout.id, partnerUpdates) ?? payout
+  return updatePayout(payout.id, partnerUpdates) ?? payout
 }
 
 export function findPayout(id: string): Payout | undefined {
@@ -73,4 +73,28 @@ export function findPayout(id: string): Payout | undefined {
 
 export function findPayouts(): Payout[] {
   return listPayouts()
+}
+
+export async function refreshPayoutStatus(
+  id: string
+): Promise<Payout | undefined> {
+  const payout = getPayoutById(id)
+
+  if (!payout) return undefined
+
+  const partner = getPartner(payout.partnerCode)
+
+  if (!partner?.getPayoutStatus) return payout
+
+  const partnerResult = await partner.getPayoutStatus(payout)
+  const updates: Partial<Omit<Payout, 'id' | 'createdAt'>> = {
+    status: partnerResult.status,
+    partnerReference: partnerResult.partnerReference
+  }
+
+  if (partnerResult.failureReason) {
+    updates.failureReason = partnerResult.failureReason
+  }
+
+  return updatePayout(id, updates) ?? payout
 }

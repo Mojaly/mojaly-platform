@@ -1,0 +1,45 @@
+meta {
+  name: Safaricom B2C Result Callback - Success
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:5070/webhooks/safaricom/b2c/result
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "Result": {
+      "ResultType": 0,
+      "ResultCode": 0,
+      "ResultDesc": "The service request is processed successfully.",
+      "OriginatorConversationID": "{{safaricomOriginatorConversationId}}",
+      "ConversationID": "AG_20260730_00000000000000000000",
+      "TransactionID": "QH12345678",
+      "ResultParameters": {
+        "ResultParameter": [
+          {
+            "Key": "TransactionAmount",
+            "Value": 10
+          },
+          {
+            "Key": "TransactionReceipt",
+            "Value": "QH12345678"
+          },
+          {
+            "Key": "ReceiverPartyPublicName",
+            "Value": "254708374149 - M-Pesa Sandbox User"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+meta {
+  name: Create Destination Resolution - Safaricom Kenya
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:5050/destination-resolutions
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "fintechId": "janjapay-01",
+    "destination": {
+      "type": "mobile_money",
+      "country": "KE",
+      "network": "SAFARICOM",
+      "account": "254708374149",
+      "name": "M-Pesa Sandbox User"
+    },
+    "amount": {
+      "value": "1000",
+      "assetCode": "KES",
+      "assetScale": 2
+    },
+    "reference": "bruno-safaricom-resolution-001"
+  }
+}

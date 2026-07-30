@@ -73,20 +73,28 @@ export class GriffinClient implements PartnerAdapter {
       )
 
       const paymentUrl = paymentResponse.data['payment-url']
-      const paymentId = paymentUrl.split('/').pop()
+      const submissionUrl =
+        paymentResponse.data['payment-submissions-url'] ??
+        `${paymentUrl}/submissions`
 
       const submissionResponse = await axios.post<GriffinSubmissionResponse>(
-        `${env.GRIFFIN_BASE_URL}/v0/payments/${paymentId}/submissions`,
+        buildGriffinUrl(submissionUrl),
         {
           'payment-scheme': env.GRIFFIN_PAYMENT_SCHEME
         },
         { headers }
       )
 
+      const partnerReference =
+        submissionResponse.data['submission-url'] ??
+        submissionResponse.data['payment-submission-url'] ??
+        paymentUrl
+
       return {
-        partnerReference:
-          submissionResponse.data['payment-submission-url'] ?? paymentUrl,
-        status: 'PENDING',
+        partnerReference,
+        status: mapGriffinSubmissionStatus(
+          submissionResponse.data['submission-status']
+        ),
         rawResponse: {
           payee: payeeResponse.data,
           payment: paymentResponse.data,
@@ -110,4 +118,36 @@ export class GriffinClient implements PartnerAdapter {
       throw error
     }
   }
+
+}
+
+export function mapGriffinSubmissionStatus(
+  status: unknown
+): PartnerPayoutResult['status'] {
+  if (
+    status === 'accepted' ||
+    status === 'completed' ||
+    status === 'delivered'
+  ) {
+    return 'COMPLETED'
+  }
+
+  if (
+    status === 'rejected' ||
+    status === 'failed' ||
+    status === 'cancelled' ||
+    status === 'returned'
+  ) {
+    return 'FAILED'
+  }
+
+  return 'PENDING'
+}
+
+function buildGriffinUrl(pathOrUrl: string): string {
+  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+    return pathOrUrl
+  }
+
+  return `${env.GRIFFIN_BASE_URL}${pathOrUrl}`
 }

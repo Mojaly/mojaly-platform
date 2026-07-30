@@ -1,0 +1,32 @@
+meta {
+  name: MTN Webhook - Transfer Successful
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:5070/webhooks/mtn/transfers/{{mtnReferenceId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "amount": "10.00",
+    "currency": "EUR",
+    "financialTransactionId": "mtn-financial-transaction-001",
+    "externalId": "MOJALY MTN TEST",
+    "payee": {
+      "partyIdType": "MSISDN",
+      "partyId": "46733123466"
+    },
+    "payerMessage": "MOJALY MTN TEST",
+    "payeeNote": "MOJALY MTN TEST",
+    "status": "SUCCESSFUL"
+  }
+}

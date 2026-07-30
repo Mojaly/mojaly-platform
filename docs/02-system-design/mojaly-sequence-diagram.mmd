@@ -1,0 +1,35 @@
+sequenceDiagram
+  autonumber
+  actor F as Fintech
+  participant G as Mojaly API Gateway
+  participant C as Mojaly Core
+  participant R as Rafiki / Open Payments
+  participant P as Bank / Mobile Partner
+
+  F->>G: Onboard and create API key
+  G->>G: Authorize workspace, hash key
+  G-->>F: API key
+
+  F->>G: Create quote
+  G->>G: Authenticate API key
+  G->>C: Check corridor and price route
+  C-->>G: Quote
+  G-->>F: Quote response
+
+  F->>G: Execute payment
+  G->>G: Authenticate API key
+  G->>C: Create payment
+  C->>C: Select route
+
+  alt Interledger route
+    C->>R: Send via Rafiki / Open Payments
+    R-->>C: Payment status
+  else Hosted partner route
+    C->>P: Send payout request
+    P-->>C: Payout status
+  end
+
+  C->>C: Track settlement
+  C-->>G: Payment status
+  G-->>F: Payment response
+  C-->>F: Webhook event

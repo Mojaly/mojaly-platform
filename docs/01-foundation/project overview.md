@@ -134,23 +134,3 @@ The fintech sees one Mojaly API and one payment status model regardless of which
 
 Mojaly targets a $329B TAM in African cross-border payments (growing to $1T by 2035, 12% CAGR), a $20M–$75M SAM across 400–500 fintechs needing multi-rail settlement, and a $7M SOM from 100 fintech clients across 5 key markets. Long term, Mojaly can become a regional Interledger Service Provider and Africa's settlement infrastructure layer: one account, every rail, no float trapped.
 
-## Target Architecture
-```mermaid
-flowchart LR
-  Fintech["Fintech API Client"]
-  Gateway["Mojaly API Gateway"]
-  Core["Mojaly Core"]
-  Rail["Fintech Rail Account"]
-  Adapter["Hosted Partner Adapter"]
-  Rafiki["Mojaly Rafiki Instance"]
-  Partner["Partner Bank / Mobile Money API"]
-  ILP["Interledger / Open Payments Network"]
-
-  Fintech --> Gateway
-  Gateway --> Core
-  Core --> Rail
-  Rail --> Adapter
-  Adapter --> Partner
-  Core --> Rafiki
-  Rafiki --> ILP
-```

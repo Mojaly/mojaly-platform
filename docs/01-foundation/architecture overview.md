@@ -41,37 +41,26 @@ Delivers payment and settlement events back to fintechs.
 
 Future service for TigerBeetle account and transfer operations.
 
-## Pitch Diagram
+## Diagram
 
 ```mermaid
 flowchart LR
-  Fintech["Fintechs<br/>Apps, wallets, remittance platforms"]
-  Gateway["Mojaly API Gateway<br/>Unified API + API keys"]
-  Console["Developer Console<br/>Onboarding, KYB, API keys, monitoring"]
-  Core["Mojaly Core<br/>Quotes, routing, payments, settlement"]
-  Rafiki["Mojaly Rafiki Instance<br/>Open Payments + ILP network access"]
-  Router["Routing + Partner Selection<br/>Choose best eligible rail"]
-  Settlement["Settlement & Reconciliation<br/>Batches, partner reports, exceptions"]
-  Webhooks["Webhook Service<br/>Payment and settlement events"]
+  Fintech["Fintech API Client"]
+  Gateway["Mojaly API Gateway"]
+  Core["Mojaly Core"]
+  Rail["Fintech Rail Account"]
+  Adapter["Hosted Partner Adapter"]
+  Rafiki["Mojaly Rafiki Instance"]
+  Partner["Partner Bank / Mobile Money API"]
+  ILP["Interledger / Open Payments Network"]
 
-  Bank["Bank Partners<br/>Accounts, liquidity, bank payouts"]
-  Mobile["Mobile-Money Partners<br/>M-Pesa, Airtel Money, wallets"]
-  ILP["Other ILP / Open Payments Peers<br/>Wallet-address payments"]
-
-  Fintech -->|"One integration"| Gateway
-  Fintech -->|"Manage workspace"| Console
-  Console --> Gateway
+  Fintech --> Gateway
   Gateway --> Core
-  Core --> Router
-  Router -->|"Local bank rails"| Bank
-  Router -->|"Mobile-money rails"| Mobile
-  Router -->|"Open Payments route"| Rafiki
+  Core --> Rail
+  Rail --> Adapter
+  Adapter --> Partner
+  Core --> Rafiki
   Rafiki --> ILP
-  Bank -->|"Callbacks + reports"| Settlement
-  Mobile -->|"Callbacks + reports"| Settlement
-  Core --> Settlement
-  Core --> Webhooks
-  Webhooks -->|"Status updates"| Fintech
 ```
 
 ## How It Works

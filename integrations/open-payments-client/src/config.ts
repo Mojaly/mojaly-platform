@@ -21,6 +21,11 @@ const envSchema = z.object({
   SENDER_ASSET_CODE: z.string().default('GBP'),
   SENDER_ASSET_SCALE: z.coerce.number().int().min(0).default(2),
 
+  DEVELOPER_WALLET_ADDRESS: z.url().optional(),
+  DEVELOPER_PRIVATE_KEY_PATH: z.string().optional(),
+  DEVELOPER_KEY_ID: z.string().optional(),
+  DEVELOPER_TARGET_WALLET_ADDRESS: z.url().optional(),
+
   RECEIVER_DESTINATION_TYPE: z
     .enum(['bank_account', 'mobile_money'])
     .default('bank_account'),

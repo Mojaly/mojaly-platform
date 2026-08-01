@@ -1,0 +1,15 @@
+meta {
+  name: List Wallet Developer Keys
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:5070/workspaces/janjapay-01/wallet-addresses/REPLACE_WITH_RAFIKI_WALLET_ADDRESS_ID/developer-keys
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

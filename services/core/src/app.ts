@@ -5,6 +5,7 @@ import { paymentIntentRoutes } from './modules/payment-intents/payment-intents.r
 import { rafikiWebhookRoutes } from './modules/rafiki-webhooks/rafiki-webhooks.routes.js'
 import { partnerPayoutCallbackRoutes } from './modules/partner-payout-callbacks/partner-payout-callbacks.routes.js'
 import { rafikiRoutes } from './modules/rafiki/rafiki.routes.js'
+import { developerKeyRoutes } from './modules/developer-keys/developer-keys.routes.js'
 
 export function buildApp() {
   const app = Fastify({
@@ -17,6 +18,7 @@ export function buildApp() {
   app.register(rafikiWebhookRoutes)
   app.register(partnerPayoutCallbackRoutes)
   app.register(rafikiRoutes)
+  app.register(developerKeyRoutes)
 
   return app
 }

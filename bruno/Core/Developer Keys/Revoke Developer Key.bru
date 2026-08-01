@@ -1,0 +1,15 @@
+meta {
+  name: Revoke Developer Key
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:5070/workspaces/janjapay-01/wallet-addresses/REPLACE_WITH_RAFIKI_WALLET_ADDRESS_ID/developer-keys/REPLACE_WITH_DEVELOPER_KEY_ID/revoke
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

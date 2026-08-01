@@ -1,23 +1,24 @@
 {
-  "name": "open-payments-client",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "tsx src/run-real-rafiki-flow.ts",
-    "build": "tsc --noEmit --pretty"
-  },
-  "dependencies": {
-    "@interledger/http-signature-utils": "^1.0.3",
-    "@interledger/open-payments": "7.4.0",
-    "axios": "^1.18.1",
-    "dotenv": "^17.4.2",
-    "json-canonicalize": "^2.0.0",
-    "zod": "4.4.3"
-  },
-  "devDependencies": {
-    "@types/node": "^26.1.1",
-    "tsx": "^4.23.1",
-    "typescript": "^7.0.2"
-  }
+    "name":  "open-payments-client",
+    "version":  "0.1.0",
+    "private":  true,
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "tsx src/run-real-rafiki-flow.ts",
+                    "build":  "tsc --noEmit --pretty",
+                    "verify:developer-key":  "tsx src/verify-developer-key.ts"
+                },
+    "dependencies":  {
+                         "@interledger/http-signature-utils":  "^1.0.3",
+                         "@interledger/open-payments":  "7.4.0",
+                         "axios":  "^1.18.1",
+                         "dotenv":  "^17.4.2",
+                         "json-canonicalize":  "^2.0.0",
+                         "zod":  "4.4.3"
+                     },
+    "devDependencies":  {
+                            "@types/node":  "^26.1.1",
+                            "tsx":  "^4.23.1",
+                            "typescript":  "^7.0.2"
+                        }
 }

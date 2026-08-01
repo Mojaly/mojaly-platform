@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mojaly — One API for cross-border payments</title>
+  <meta name="description" content="Mojaly lets fintechs integrate once and route payments across borders through Rafiki, Open Payments, and hosted partner rails, without ever holding funds." />
+  <link rel="icon" type="image/png" href="/mojaly_logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <header class="nav" data-reveal>
+    <a class="nav__brand" href="/">
+      <img src="/mojaly_logo.png" alt="Mojaly" class="nav__logo" />
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#how-it-works">How it works</a>
+      <a href="#trust">Non-custodial</a>
+      <a href="#developers">Developers</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost" href="/docs">Read the docs</a>
+      <a class="btn btn--primary" href="/signup">Get API access</a>
+    </div>
+    <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navMobile">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <nav id="navMobile" class="nav-mobile" aria-label="Mobile">
+    <a href="#how-it-works">How it works</a>
+    <a href="#trust">Non-custodial</a>
+    <a href="#developers">Developers</a>
+    <a href="/docs">Docs</a>
+    <a class="btn btn--primary" href="/signup">Get API access</a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero__grid">
+        <div class="hero__copy" data-reveal>
+          <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Built on Interledger and Open Payments</p>
+          <h1>One API.<br />One liquidity account.<br /><span class="hero__accent">Every corridor.</span></h1>
+          <p class="hero__lede">
+            Fund one account in your home corridor. Mojaly finds the right route for every payment,
+            through Rafiki, Open Payments, or a hosted bank and mobile-money partner,
+            and settles it directly against your account. Mojaly never holds your funds.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--lg" href="/signup">Get API access</a>
+            <a class="btn btn--ghost btn--lg" href="/docs">Read the docs</a>
+          </div>
+        </div>
+        <div class="hero__visual" aria-hidden="true">
+          <svg id="routingMap" viewBox="0 0 480 480" class="routing-map">
+            <g class="routing-map__lines" stroke-width="1">
+              <line x1="240" y1="240" x2="120" y2="120" />
+              <line x1="240" y1="240" x2="360" y2="100" />
+              <line x1="240" y1="240" x2="90" y2="320" />
+              <line x1="240" y1="240" x2="380" y2="340" />
+              <line x1="240" y1="240" x2="240" y2="70" />
+            </g>
+            <g class="routing-map__pulse" stroke-width="2">
+              <line x1="240" y1="240" x2="120" y2="120" />
+              <line x1="240" y1="240" x2="360" y2="100" />
+              <line x1="240" y1="240" x2="90" y2="320" />
+              <line x1="240" y1="240" x2="380" y2="340" />
+              <line x1="240" y1="240" x2="240" y2="70" />
+            </g>
+            <circle class="routing-map__hub" cx="240" cy="240" r="10" />
+            <circle class="routing-map__node" cx="120" cy="120" r="5" />
+            <circle class="routing-map__node" cx="360" cy="100" r="5" />
+            <circle class="routing-map__node" cx="90" cy="320" r="5" />
+            <circle class="routing-map__node" cx="380" cy="340" r="5" />
+            <circle class="routing-map__node" cx="240" cy="70" r="5" />
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="problem" data-reveal>
+      <p class="section-eyebrow">The problem today</p>
+      <h2 class="section-title">Every corridor means starting over</h2>
+      <div class="problem__grid">
+        <article class="problem__card">
+          <p class="problem__card-label">Capital</p>
+          <p class="problem__card-body">A funded account sits idle with every bank and mobile-money partner you connect to.</p>
+        </article>
+        <article class="problem__card">
+          <p class="problem__card-label">Engineering</p>
+          <p class="problem__card-body">Every partner has its own API, auth model, and payout format to integrate and maintain.</p>
+        </article>
+        <article class="problem__card">
+          <p class="problem__card-label">Time</p>
+          <p class="problem__card-body">Weeks of partner onboarding stand between you and the first payment in a new market.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="how" data-reveal>
+      <p class="section-eyebrow">How it works</p>
+      <h2 class="section-title">Four steps, one integration</h2>
+      <ol class="how__steps">
+        <li class="how__step">
+          <span class="how__index">01</span>
+          <p class="how__title">Fund your account</p>
+          <p class="how__body">Fund a single liquidity account in the corridor where you're registered.</p>
+        </li>
+        <li class="how__step">
+          <span class="how__index">02</span>
+          <p class="how__title">Call one API</p>
+          <p class="how__body">Send a payment request. Mojaly quotes it and picks the eligible route.</p>
+        </li>
+        <li class="how__step">
+          <span class="how__index">03</span>
+          <p class="how__title">Mojaly routes it</p>
+          <p class="how__body">Rafiki and Open Payments handle it, or a hosted bank or mobile-money partner pays out.</p>
+        </li>
+        <li class="how__step">
+          <span class="how__index">04</span>
+          <p class="how__title">Settlement is recorded</p>
+          <p class="how__body">Your account settles directly with the partner. You get a webhook the moment it does.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="trust" class="trust" data-reveal>
+      <div class="trust__inner">
+        <p class="trust__mark" aria-hidden="true">&#10003;</p>
+        <h2 class="trust__title">Mojaly never holds your funds</h2>
+        <p class="trust__body">
+          Mojaly finds the right payout partner and reports the obligation back to you.
+          The obligation, and its settlement, is always between your liquidity account and the partner &mdash;
+          Mojaly is the router and the record, never the custodian.
+        </p>
+      </div>
+    </section>
+
+    <section id="developers" class="dev" data-reveal>
+      <div class="dev__grid">
+        <div class="dev__copy">
+          <p class="section-eyebrow">For developers</p>
+          <h2 class="section-title">Send a payment in one call</h2>
+          <p class="dev__body">Every route, whether it lands on Rafiki or a local payout partner, returns the same response shape.</p>
+          <a class="btn btn--ghost" href="/docs">Browse the API reference</a>
+        </div>
+        <div class="dev__code" role="img" aria-label="Example API request to create a payment">
+          <div class="dev__code-bar">
+            <span></span><span></span><span></span>
+            <span class="dev__code-path">POST /v1/payments</span>
+          </div>
+          <pre class="dev__code-body"><code>{
+  "sourceAsset": "KES",
+  "destinationAsset": "NGN",
+  "amount": 50000,
+  "receiver": "wallet-address$mojaly.dev/alex"
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" data-reveal>
+      <h2 class="cta__title">Route your first payment today</h2>
+      <div class="hero__actions">
+        <a class="btn btn--primary btn--lg" href="/signup">Get API access</a>
+        <a class="btn btn--ghost btn--lg" href="/docs">Read the docs</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <img src="/mojaly_logo.png" alt="Mojaly" class="footer__logo" />
+    <div class="footer__links">
+      <a href="/docs">Docs</a>
+      <a href="https://github.com">GitHub</a>
+      <a href="/contact">Contact</a>
+    </div>
+    <p class="footer__copy">&copy; <span id="year"></span> Mojaly</p>
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

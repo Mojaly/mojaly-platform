@@ -1,0 +1,15 @@
+meta {
+  name: Get Griffin Account Balance
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{partner_adapter_base_url}}/partners/GRIFFIN/accounts/replace-with-griffin-bank-account-id/balance?assetCode=GBP&assetScale=2
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

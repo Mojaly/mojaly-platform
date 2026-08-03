@@ -1,0 +1,52 @@
+meta {
+  name: Outgoing Payment Failed Webhook
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{core_base_url}}/rafiki/webhooks
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "id": "evt-outgoing-failed-001",
+    "type": "outgoing_payment.failed",
+    "data": {
+      "id": "outgoing-payment-001",
+      "walletAddressId": "wallet-address-001",
+      "state": "FAILED",
+      "receiver": "https://receiver.example/.well-known/pay",
+      "debitAmount": {
+        "value": "1000",
+        "assetCode": "GBP",
+        "assetScale": 2
+      },
+      "receiveAmount": {
+        "value": "1000",
+        "assetCode": "GBP",
+        "assetScale": 2
+      },
+      "sentAmount": {
+        "value": "0",
+        "assetCode": "GBP",
+        "assetScale": 2
+      },
+      "stateAttempts": 1,
+      "createdAt": "2026-08-01T10:00:00.000Z",
+      "balance": "0",
+      "error": "Receiver rejected payment",
+      "metadata": {
+        "paymentReference": "replace-with-payment-intent-id",
+        "description": "Rafiki outgoing payment failed"
+      }
+    }
+  }
+}

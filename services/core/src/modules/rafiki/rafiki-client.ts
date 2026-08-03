@@ -271,7 +271,8 @@ export class RafikiClient implements IRafikiClient {
   public async createRafikiWalletAddress(
     publicName: string,
     assetId: string,
-    url: string
+    url: string,
+    tenantId?: string
   ) {
     const response = await this.backendGraphQLClient.request<
       CreateWalletAddressMutation,
@@ -280,7 +281,8 @@ export class RafikiClient implements IRafikiClient {
       input: {
         assetId,
         publicName,
-        address: url
+        address: url,
+        ...(tenantId ? { tenantId } : {})
       }
     })
 

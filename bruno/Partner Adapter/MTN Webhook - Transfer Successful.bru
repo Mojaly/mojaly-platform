@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:5070/webhooks/mtn/transfers/{{mtnReferenceId}}
+  url: {{partner_adapter_base_url}}/webhooks/mtn/transfers/{{mtnReferenceId}}
   body: json
   auth: none
 }

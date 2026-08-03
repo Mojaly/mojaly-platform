@@ -9,6 +9,7 @@ import { MtnClient } from './vendors/mtn/mtn.client.js'
 import { mtnWebhookRoutes } from './vendors/mtn/mtn.webhook.routes.js'
 import { SafaricomClient } from './vendors/safaricom/safaricom.client.js'
 import { safaricomWebhookRoutes } from './vendors/safaricom/safaricom.webhook.routes.js'
+import { balancesRoutes } from './modules/balances/balances.routes.js'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -41,6 +42,7 @@ export function buildApp() {
 
   app.register(healthRoutes)
   app.register(payoutsRoutes)
+  app.register(balancesRoutes)
   app.register(griffinWebhookRoutes)
   app.register(mtnWebhookRoutes)
   app.register(safaricomWebhookRoutes)

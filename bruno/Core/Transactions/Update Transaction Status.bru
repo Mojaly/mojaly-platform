@@ -1,0 +1,24 @@
+meta {
+  name: Update Transaction Status
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{core_base_url}}/transactions/replace-with-transaction-id/status
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "COMPLETED",
+    "partnerReference": "griffin-payment-reference",
+    "description": "Partner payout completed"
+  }
+}

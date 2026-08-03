@@ -1,0 +1,15 @@
+meta {
+  name: Get Account Balance
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{core_base_url}}/accounts/replace-with-account-id/balance
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

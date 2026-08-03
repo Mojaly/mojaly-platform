@@ -1,4 +1,4 @@
-import { z } from 'zod'
+﻿import { z } from 'zod'
 import { EventType, PaymentType } from './rafiki.types.js'
 
 const quoteAmountSchema = z.object({
@@ -44,7 +44,8 @@ const incomingPaymentSchema = z.object({
   incomingAmount: amountSchema.optional(),
   metadata: z
     .object({
-      description: z.string().optional()
+      description: z.string().optional(),
+      paymentReference: z.string().optional()
     })
     .optional()
 })
@@ -63,7 +64,8 @@ const outgoingPaymentSchema = z.object({
   client: z.string().nullable().optional(),
   metadata: z
     .object({
-      description: z.string().optional()
+      description: z.string().optional(),
+      paymentReference: z.string().optional()
     })
     .optional(),
   peerId: z.string().optional(),
@@ -117,3 +119,4 @@ export const webhookBodySchema = z.object({
   body: webhookSchema
 })
 export type WebhookType = z.infer<typeof webhookSchema>
+

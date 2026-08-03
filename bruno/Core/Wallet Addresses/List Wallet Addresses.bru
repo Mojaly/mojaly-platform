@@ -1,0 +1,15 @@
+meta {
+  name: List Wallet Addresses
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{core_base_url}}/wallet-addresses
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

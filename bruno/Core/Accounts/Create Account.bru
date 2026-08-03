@@ -1,0 +1,28 @@
+meta {
+  name: Create Account
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{core_base_url}}/accounts
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "fintechId": "janjapay-01",
+    "name": "JanjaPay Griffin GBP",
+    "partnerCode": "GRIFFIN",
+    "externalPartnerAccountId": "ba.O3MN5dnrUBmCdfMbJcHS0w",
+    "rafikiAssetId": "c69e69bf-5d39-4ca0-a955-26301aaf01ac",
+    "assetCode": "GBP",
+    "assetScale": 2
+  }
+}

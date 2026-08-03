@@ -1,0 +1,15 @@
+meta {
+  name: List Transactions
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{core_base_url}}/transactions
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

@@ -1,0 +1,15 @@
+meta {
+  name: List Account Transactions
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{core_base_url}}/accounts/replace-with-account-id/transactions
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

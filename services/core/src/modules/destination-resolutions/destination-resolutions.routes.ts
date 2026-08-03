@@ -1,6 +1,9 @@
-import type { FastifyPluginAsync } from 'fastify'
+﻿import type { FastifyPluginAsync } from 'fastify'
 import { createDestinationResolutionSchema } from './destination-resolutions.schemas.js'
-import { createDestinationResolution } from './destination-resolutions.service.js'
+import {
+  createDestinationResolution,
+  mapDestinationResolutionError
+} from './destination-resolutions.service.js'
 
 export const destinationResolutionRoutes: FastifyPluginAsync = async (app) => {
   app.post('/destination-resolutions', async (request, reply) => {
@@ -16,17 +19,33 @@ export const destinationResolutionRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    const intent = createDestinationResolution(result.data)
+    try {
+      const intent = await createDestinationResolution(result.data)
 
-    return reply.code(201).send({
-      data: {
-        paymentIntentId: intent.id,
-        walletAddress: intent.walletAddress,
-        paymentReference: intent.id,
-        partnerCode: intent.partnerCode,
-        status: intent.status,
-        expiresAt: intent.expiresAt
+      return reply.code(201).send({
+        data: {
+          paymentIntentId: intent.id,
+          walletAddress: intent.walletAddress,
+          paymentReference: intent.id,
+          partnerCode: intent.partnerCode,
+          status: intent.status,
+          expiresAt: intent.expiresAt
+        }
+      })
+    } catch (error) {
+      const mappedError = mapDestinationResolutionError(error)
+
+      if (!mappedError) {
+        throw error
       }
-    })
+
+      return reply.code(mappedError.statusCode).send({
+        error: {
+          code: mappedError.code,
+          message: mappedError.message,
+          details: mappedError.details
+        }
+      })
+    }
   })
 }

@@ -1,5 +1,7 @@
-import type { FastifyPluginAsync } from 'fastify'
+﻿import type { FastifyPluginAsync } from 'fastify'
 import { createRafikiClient } from './rafiki.factory.js'
+import { handleRafikiWebhook } from './service.js'
+import { webhookSchema } from './validation.js'
 
 export const rafikiRoutes: FastifyPluginAsync = async (app) => {
   const rafikiClient = createRafikiClient()
@@ -11,4 +13,25 @@ export const rafikiRoutes: FastifyPluginAsync = async (app) => {
       data: assets
     })
   })
+
+  app.post('/rafiki/webhooks', async (request, reply) => {
+    const result = webhookSchema.safeParse(request.body)
+
+    if (!result.success) {
+      return reply.code(400).send({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid Rafiki webhook event',
+          details: result.error.flatten()
+        }
+      })
+    }
+
+    const response = await handleRafikiWebhook(result.data, rafikiClient)
+
+    return reply.code(200).send({
+      data: response
+    })
+  })
 }
+

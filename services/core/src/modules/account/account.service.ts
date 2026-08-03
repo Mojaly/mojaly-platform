@@ -1,0 +1,64 @@
+﻿import { randomUUID } from 'node:crypto'
+import { getPartnerAccountBalance } from '../../clients/partner-adapter.client.js'
+import {
+  getAccountById,
+  listAccounts,
+  listAccountsByFintech,
+  saveAccount
+} from './account.store.js'
+import type { Account, CreateAccountInput } from './account.types.js'
+
+export function createAccount(input: CreateAccountInput): Account {
+  const now = new Date().toISOString()
+
+  const account: Account = {
+    id: randomUUID(),
+    fintechId: input.fintechId,
+    name: input.name,
+    partnerCode: input.partnerCode,
+    externalPartnerAccountId: input.externalPartnerAccountId,
+    assetCode: input.assetCode,
+    assetScale: input.assetScale,
+    status: 'ACTIVE',
+    createdAt: now,
+    updatedAt: now
+  }
+
+  if (input.rafikiAssetId) {
+    account.rafikiAssetId = input.rafikiAssetId
+  }
+
+  return saveAccount(account)
+}
+
+export function getAccount(id: string): Account | undefined {
+  return getAccountById(id)
+}
+
+export function getAccounts(): Account[] {
+  return listAccounts()
+}
+
+export function getFintechAccounts(fintechId: string): Account[] {
+  return listAccountsByFintech(fintechId)
+}
+export async function getAccountBalance(id: string) {
+  const account = getAccountById(id)
+
+  if (!account) {
+    throw new Error('ACCOUNT_NOT_FOUND')
+  }
+
+  // Like Testnet asks GateHub, Mojaly asks the backing partner for spend capacity.
+  const balanceResponse = await getPartnerAccountBalance({
+    partnerCode: account.partnerCode,
+    externalAccountId: account.externalPartnerAccountId,
+    assetCode: account.assetCode,
+    assetScale: account.assetScale
+  })
+
+  return {
+    account,
+    balance: balanceResponse.data
+  }
+}

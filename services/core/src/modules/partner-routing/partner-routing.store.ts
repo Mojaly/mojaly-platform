@@ -119,6 +119,14 @@ export function listRoutingPartners(): RoutingPartner[] {
   return Array.from(partners.values())
 }
 
+
+export function findRoutingPartnerByAdapterCode(
+  adapterCode: string
+): RoutingPartner | undefined {
+  return Array.from(partners.values()).find(
+    (partner) => partner.adapterCode === adapterCode && partner.status === 'ACTIVE'
+  )
+}
 export function listPartnerCapabilities(): PartnerCapability[] {
   return Array.from(capabilities.values())
 }

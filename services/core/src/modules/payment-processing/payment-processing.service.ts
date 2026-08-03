@@ -1,9 +1,12 @@
-﻿import { createPartnerPayout } from '../../clients/partner-adapter.client.js'
+import { createPartnerPayout } from '../../clients/partner-adapter.client.js'
 import {
   getPaymentIntentById,
   updatePaymentIntent
 } from '../payment-intents/payment-intent.store.js'
-import type { PaymentIntentStatus } from '../payment-intents/payment-intent.types.js'
+import type {
+  PaymentAmount,
+  PaymentIntentStatus
+} from '../payment-intents/payment-intent.types.js'
 
 export interface PartnerPayoutStatusInput {
   paymentIntentId: string
@@ -22,12 +25,12 @@ export async function handleFundingConfirmed(paymentReference: string) {
     }
   }
 
-  if (isTerminalOrSubmitted(intent.status)) {
+  if (isFundingAlreadyConfirmed(intent.status)) {
     return {
       handled: true,
       paymentIntentId: intent.id,
       status: intent.status,
-      reason: 'Payment intent already processed'
+      reason: 'Payment intent funding was already confirmed'
     }
   }
 
@@ -42,41 +45,92 @@ export async function handleFundingConfirmed(paymentReference: string) {
     }
   }
 
-  try {
-    const payoutResponse = await createPartnerPayout(fundedIntent)
-    const adapterPayoutId = extractAdapterPayoutId(payoutResponse)
+  return {
+    handled: true,
+    paymentIntentId: fundedIntent.id,
+    status: fundedIntent.status
+  }
+}
 
+export async function handleInterledgerPaymentCompleted(
+  paymentReference: string,
+  payoutAmount?: PaymentAmount
+) {
+  const intent = getPaymentIntentById(paymentReference)
+
+  if (!intent) {
+    return {
+      handled: false,
+      reason: 'Payment intent not found for payment reference'
+    }
+  }
+
+  if (isTerminalOrSubmitted(intent.status)) {
+    return {
+      handled: true,
+      paymentIntentId: intent.id,
+      status: intent.status,
+      adapterPayoutId: intent.adapterPayoutId,
+      reason: 'Partner payout already processed'
+    }
+  }
+
+  try {
+    const payoutResponse = await createPartnerPayout(intent, payoutAmount)
+    const adapterPayoutId = extractAdapterPayoutId(payoutResponse)
+    const adapterStatus = extractAdapterPayoutStatus(payoutResponse)
+    const failureReason = extractAdapterFailureReason(payoutResponse)
+
+    if (adapterStatus === 'FAILED') {
+      const failedPayload: {
+        status: 'FAILED'
+        adapterPayoutId?: string
+        failureReason?: string
+      } = {
+        status: 'FAILED'
+      }
+
+      if (adapterPayoutId) {
+        failedPayload.adapterPayoutId = adapterPayoutId
+      }
+
+      if (failureReason) {
+        failedPayload.failureReason = failureReason
+      }
+
+      const failedIntent = updatePaymentIntent(intent.id, failedPayload)
+
+      return {
+        handled: true,
+        paymentIntentId: failedIntent?.id ?? intent.id,
+        status: failedIntent?.status ?? 'FAILED',
+        adapterPayoutId,
+        reason: failureReason ?? 'Partner payout failed'
+      }
+    }
+
+    const status = adapterStatus === 'COMPLETED' ? 'COMPLETED' : 'PAYOUT_SUBMITTED'
     const updatePayload: {
-      status: 'PAYOUT_SUBMITTED'
+      status: 'COMPLETED' | 'PAYOUT_SUBMITTED'
       adapterPayoutId?: string
     } = {
-      status: 'PAYOUT_SUBMITTED'
+      status
     }
 
     if (adapterPayoutId) {
       updatePayload.adapterPayoutId = adapterPayoutId
     }
 
-    const payoutSubmittedIntent = updatePaymentIntent(
-      fundedIntent.id,
-      updatePayload
-    )
-
-    if (!payoutSubmittedIntent) {
-      return {
-        handled: false,
-        reason: 'Payment intent payout was created but intent could not be updated'
-      }
-    }
+    const updatedIntent = updatePaymentIntent(intent.id, updatePayload)
 
     return {
       handled: true,
-      paymentIntentId: payoutSubmittedIntent.id,
-      status: payoutSubmittedIntent.status,
+      paymentIntentId: updatedIntent?.id ?? intent.id,
+      status: updatedIntent?.status ?? status,
       adapterPayoutId
     }
   } catch (error) {
-    const failedIntent = updatePaymentIntent(fundedIntent.id, {
+    const failedIntent = updatePaymentIntent(intent.id, {
       status: 'FAILED',
       failureReason:
         error instanceof Error ? error.message : 'Partner payout failed'
@@ -84,9 +138,98 @@ export async function handleFundingConfirmed(paymentReference: string) {
 
     return {
       handled: false,
-      paymentIntentId: failedIntent?.id ?? fundedIntent.id,
+      paymentIntentId: failedIntent?.id ?? intent.id,
       status: failedIntent?.status ?? 'FAILED',
       reason: 'Partner payout failed'
+    }
+  }
+}
+
+export async function retryPartnerPayout(paymentIntentId: string) {
+  const intent = getPaymentIntentById(paymentIntentId)
+
+  if (!intent) {
+    return {
+      handled: false,
+      reason: 'Payment intent not found'
+    }
+  }
+
+  if (intent.status !== 'FAILED') {
+    return {
+      handled: false,
+      paymentIntentId: intent.id,
+      status: intent.status,
+      reason: 'Only failed payment intents can retry partner payout'
+    }
+  }
+
+  try {
+    const payoutResponse = await createPartnerPayout(intent)
+    const adapterPayoutId = extractAdapterPayoutId(payoutResponse)
+    const adapterStatus = extractAdapterPayoutStatus(payoutResponse)
+    const failureReason = extractAdapterFailureReason(payoutResponse)
+
+    if (adapterStatus === 'FAILED') {
+      const failedPayload: {
+        status: 'FAILED'
+        adapterPayoutId?: string
+        failureReason?: string
+      } = {
+        status: 'FAILED'
+      }
+
+      if (adapterPayoutId) {
+        failedPayload.adapterPayoutId = adapterPayoutId
+      }
+
+      if (failureReason) {
+        failedPayload.failureReason = failureReason
+      }
+
+      const failedIntent = updatePaymentIntent(intent.id, failedPayload)
+
+      return {
+        handled: true,
+        paymentIntentId: failedIntent?.id ?? intent.id,
+        status: failedIntent?.status ?? 'FAILED',
+        adapterPayoutId,
+        reason: failureReason ?? 'Partner payout retry failed'
+      }
+    }
+
+    const status = adapterStatus === 'COMPLETED' ? 'COMPLETED' : 'PAYOUT_SUBMITTED'
+    const updatePayload: {
+      status: 'COMPLETED' | 'PAYOUT_SUBMITTED'
+      adapterPayoutId?: string
+    } = {
+      status,
+    }
+
+    if (adapterPayoutId) {
+      updatePayload.adapterPayoutId = adapterPayoutId
+    }
+
+    const updatedIntent = updatePaymentIntent(intent.id, updatePayload)
+
+    return {
+      handled: true,
+      paymentIntentId: updatedIntent?.id ?? intent.id,
+      status: updatedIntent?.status ?? status,
+      adapterPayoutId
+    }
+  } catch (error) {
+    const failedIntent = updatePaymentIntent(intent.id, {
+      status: 'FAILED',
+      failureReason:
+        error instanceof Error ? error.message : 'Partner payout retry failed'
+    })
+
+    return {
+      handled: false,
+      paymentIntentId: failedIntent?.id ?? intent.id,
+      status: failedIntent?.status ?? 'FAILED',
+      reason: 'Partner payout retry failed'
     }
   }
 }
@@ -146,6 +289,15 @@ export function handlePartnerPayoutStatus(input: PartnerPayoutStatusInput) {
   }
 }
 
+function isFundingAlreadyConfirmed(status: PaymentIntentStatus) {
+  return (
+    status === 'FUNDED' ||
+    status === 'PAYOUT_SUBMITTED' ||
+    status === 'COMPLETED' ||
+    status === 'FAILED'
+  )
+}
+
 function isTerminalOrSubmitted(status: PaymentIntentStatus) {
   return (
     status === 'PAYOUT_SUBMITTED' ||
@@ -155,16 +307,48 @@ function isTerminalOrSubmitted(status: PaymentIntentStatus) {
 }
 
 function extractAdapterPayoutId(response: unknown) {
+  const data = extractAdapterResponseData(response)
+
+  if (data && 'id' in data && typeof data.id === 'string') {
+    return data.id
+  }
+
+  return undefined
+}
+
+function extractAdapterPayoutStatus(response: unknown) {
+  const data = extractAdapterResponseData(response)
+
+  if (data && 'status' in data && typeof data.status === 'string') {
+    return data.status
+  }
+
+  return undefined
+}
+
+function extractAdapterFailureReason(response: unknown) {
+  const data = extractAdapterResponseData(response)
+
+  if (
+    data &&
+    'failureReason' in data &&
+    typeof data.failureReason === 'string'
+  ) {
+    return data.failureReason
+  }
+
+  return undefined
+}
+
+function extractAdapterResponseData(response: unknown): Record<string, unknown> | undefined {
   if (
     response &&
     typeof response === 'object' &&
     'data' in response &&
     response.data &&
-    typeof response.data === 'object' &&
-    'id' in response.data &&
-    typeof response.data.id === 'string'
+    typeof response.data === 'object'
   ) {
-    return response.data.id
+    return response.data as Record<string, unknown>
   }
 
   return undefined

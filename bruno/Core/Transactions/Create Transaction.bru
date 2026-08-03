@@ -1,0 +1,32 @@
+meta {
+  name: Create Transaction
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{core_base_url}}/transactions
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "paymentId": "op-payment-001",
+    "accountId": "replace-with-account-id",
+    "walletAddressId": "replace-with-wallet-address-id",
+    "paymentIntentId": "replace-with-payment-intent-id",
+    "assetCode": "GBP",
+    "assetScale": 2,
+    "value": "1000",
+    "type": "OUTGOING",
+    "status": "PENDING",
+    "source": "INTERLEDGER",
+    "description": "Rafiki outgoing payment created"
+  }
+}

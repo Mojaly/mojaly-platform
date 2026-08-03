@@ -1,0 +1,40 @@
+meta {
+  name: Incoming Payment Completed Webhook
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{core_base_url}}/rafiki/webhooks
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "id": "evt-incoming-completed-001",
+    "type": "incoming_payment.completed",
+    "data": {
+      "id": "incoming-payment-001",
+      "walletAddressId": "wallet-address-001",
+      "client": "test-client",
+      "createdAt": "2026-08-01T10:00:00.000Z",
+      "expiresAt": "2026-08-01T11:00:00.000Z",
+      "completed": true,
+      "receivedAmount": {
+        "value": "1000",
+        "assetCode": "GBP",
+        "assetScale": 2
+      },
+      "metadata": {
+        "paymentReference": "replace-with-payment-intent-id",
+        "description": "Rafiki incoming payment completed"
+      }
+    }
+  }
+}

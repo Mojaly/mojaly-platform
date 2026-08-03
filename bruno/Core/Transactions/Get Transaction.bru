@@ -1,0 +1,15 @@
+meta {
+  name: Get Transaction
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{core_base_url}}/transactions/replace-with-transaction-id
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

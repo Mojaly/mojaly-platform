@@ -1,9 +1,15 @@
-import axios from 'axios'
+﻿import axios from 'axios'
 import { env } from '../config/env.js'
-import type { PaymentIntent } from '../modules/payment-intents/payment-intent.types.js'
+import type {
+  PaymentAmount,
+  PaymentIntent
+} from '../modules/payment-intents/payment-intent.types.js'
 
-export async function createPartnerPayout(intent: PaymentIntent) {
-  const payload = buildPartnerPayoutPayload(intent)
+export async function createPartnerPayout(
+  intent: PaymentIntent,
+  amountOverride?: PaymentAmount
+) {
+  const payload = buildPartnerPayoutPayload(intent, amountOverride)
 
   const response = await axios.post(`${env.PARTNER_ADAPTER_URL}/payouts`, payload, {
     headers: {
@@ -16,7 +22,34 @@ export async function createPartnerPayout(intent: PaymentIntent) {
   return response.data
 }
 
-function buildPartnerPayoutPayload(intent: PaymentIntent) {
+export async function getPartnerAccountBalance(input: {
+  partnerCode: string
+  externalAccountId: string
+  assetCode: string
+  assetScale: number
+}) {
+  const response = await axios.get(
+    `${env.PARTNER_ADAPTER_URL}/partners/${input.partnerCode}/accounts/${input.externalAccountId}/balance`,
+    {
+      params: {
+        assetCode: input.assetCode,
+        assetScale: input.assetScale
+      },
+      headers: {
+        Accept: 'application/json'
+      },
+      timeout: 10_000
+    }
+  )
+
+  return response.data
+}
+function buildPartnerPayoutPayload(
+  intent: PaymentIntent,
+  amountOverride?: PaymentAmount
+) {
+  const amount = amountOverride ?? intent.amount
+
   const payload: {
     paymentId: string
     partnerCode: string
@@ -32,9 +65,9 @@ function buildPartnerPayoutPayload(intent: PaymentIntent) {
   } = {
     paymentId: intent.id,
     partnerCode: intent.partnerCode,
-    amount: intent.amount.value,
-    assetCode: intent.amount.assetCode,
-    assetScale: intent.amount.assetScale,
+    amount: amount.value,
+    assetCode: amount.assetCode,
+    assetScale: amount.assetScale,
     destinationType: intent.destination.type,
     destinationAccount: intent.destination.account,
     reference: intent.reference

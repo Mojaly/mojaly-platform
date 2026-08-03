@@ -1,4 +1,4 @@
-import axios from 'axios'
+﻿import axios from 'axios'
 import { env } from '../../config/env.js'
 import type {
   PartnerAdapter,
@@ -119,6 +119,39 @@ export class GriffinClient implements PartnerAdapter {
     }
   }
 
+  async getBalance(input: {
+    externalAccountId: string
+    assetCode: string
+    assetScale: number
+  }) {
+    const apiKey = requireConfig('GRIFFIN_API_KEY', env.GRIFFIN_API_KEY)
+
+    const headers = {
+      Authorization: `GriffinAPIKey ${apiKey}`,
+      Accept: 'application/json'
+    }
+
+    // externalAccountId is the Griffin bank account id saved on the Mojaly account.
+    const response = await axios.get(
+      `${env.GRIFFIN_BASE_URL}/v0/bank/accounts/${input.externalAccountId}`,
+      { headers }
+    )
+
+    const available = extractGriffinAvailableBalance(
+      response.data,
+      input.assetCode,
+      input.assetScale
+    )
+
+    return {
+      partnerCode: this.code,
+      externalAccountId: input.externalAccountId,
+      assetCode: input.assetCode,
+      assetScale: input.assetScale,
+      available,
+      rawResponse: response.data
+    }
+  }
 }
 
 export function mapGriffinSubmissionStatus(
@@ -151,3 +184,38 @@ function buildGriffinUrl(pathOrUrl: string): string {
 
   return `${env.GRIFFIN_BASE_URL}${pathOrUrl}`
 }
+function extractGriffinAvailableBalance(
+  data: unknown,
+  assetCode: string,
+  assetScale: number
+): string {
+  if (!data || typeof data !== 'object') {
+    return '0'
+  }
+
+  const record = data as {
+    'available-balance'?: {
+      currency?: string
+      value?: string
+    }
+  }
+
+  const balance = record['available-balance']
+
+  if (!balance || balance.currency !== assetCode || !balance.value) {
+    return '0'
+  }
+
+  return majorAmountToMinorUnits(balance.value, assetScale)
+}
+
+function majorAmountToMinorUnits(value: string, assetScale: number): string {
+  const parsed = Number(value)
+
+  if (!Number.isFinite(parsed)) {
+    return '0'
+  }
+
+  return String(Math.round(parsed * 10 ** assetScale))
+}
+

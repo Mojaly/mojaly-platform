@@ -1,4 +1,4 @@
-﻿import type { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync, FastifyReply } from 'fastify'
 import {
   createDeveloperKeyBodySchema,
   createDeveloperKeyParamsSchema,
@@ -33,20 +33,25 @@ export const developerKeyRoutes: FastifyPluginAsync = async (app) => {
         })
       }
 
-      const created = await createDeveloperKey({
-        workspaceId: params.data.workspaceId,
-        walletAddressId: params.data.walletAddressId,
-        name: body.data.name
-      })
+      try {
+        const created = await createDeveloperKey({
+          workspaceId: params.data.workspaceId,
+          walletAddressId: params.data.walletAddressId,
+          name: body.data.name
+        })
 
-      return reply.code(201).send({
-        data: {
-          key: created.key,
-          privateKey: created.privateKey,
-          publicKey: created.publicKey,
-          keyId: created.keyId
-        }
-      })
+        return reply.code(201).send({
+          data: {
+            key: created.key,
+            privateKey: created.privateKey,
+            publicKey: created.publicKey,
+            keyId: created.keyId,
+            walletAddressUrl: created.walletAddressUrl
+          }
+        })
+      } catch (error) {
+        return mapDeveloperKeyError(error, reply)
+      }
     }
   )
 
@@ -85,12 +90,16 @@ export const developerKeyRoutes: FastifyPluginAsync = async (app) => {
         })
       }
 
-      return reply.send({
-        data: listDeveloperKeysForWallet(
-          result.data.workspaceId,
-          result.data.walletAddressId
-        )
-      })
+      try {
+        return reply.send({
+          data: listDeveloperKeysForWallet(
+            result.data.workspaceId,
+            result.data.walletAddressId
+          )
+        })
+      } catch (error) {
+        return mapDeveloperKeyError(error, reply)
+      }
     }
   )
 
@@ -109,7 +118,12 @@ export const developerKeyRoutes: FastifyPluginAsync = async (app) => {
         })
       }
 
-      const revoked = await revokeDeveloperKey(result.data)
+      let revoked
+      try {
+        revoked = await revokeDeveloperKey(result.data)
+      } catch (error) {
+        return mapDeveloperKeyError(error, reply)
+      }
 
       if (!revoked) {
         return reply.code(404).send({
@@ -125,4 +139,29 @@ export const developerKeyRoutes: FastifyPluginAsync = async (app) => {
       })
     }
   )
+}
+
+function mapDeveloperKeyError(error: unknown, reply: FastifyReply) {
+  if (!(error instanceof Error)) {
+    throw error
+  }
+
+  const statusByCode: Record<string, number> = {
+    WALLET_ADDRESS_NOT_FOUND: 404,
+    WALLET_ADDRESS_WORKSPACE_MISMATCH: 403,
+    WALLET_ADDRESS_INACTIVE: 409
+  }
+
+  const statusCode = statusByCode[error.message]
+
+  if (!statusCode) {
+    throw error
+  }
+
+  return reply.code(statusCode).send({
+    error: {
+      code: error.message,
+      message: error.message.toLowerCase().replaceAll('_', ' ')
+    }
+  })
 }

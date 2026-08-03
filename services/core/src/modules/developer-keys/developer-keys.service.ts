@@ -1,5 +1,6 @@
-﻿import { generateKeyPairSync, randomUUID } from 'node:crypto'
+import { generateKeyPairSync, randomUUID } from 'node:crypto'
 import { createRafikiClient } from '../rafiki/rafiki.factory.js'
+import { getWalletAddress } from '../wallet-addresses/wallet-address.service.js'
 import { generateJwk } from '../../utils/jwk.js'
 import {
   getDeveloperKeyById,
@@ -17,6 +18,10 @@ import type {
 export async function createDeveloperKey(
   input: CreateDeveloperKeyInput
 ): Promise<CreateDeveloperKeyResult> {
+  const walletAddress = assertWalletAddressBelongsToWorkspace(
+    input.walletAddressId,
+    input.workspaceId
+  )
   const keyId = randomUUID()
   const now = new Date().toISOString()
 
@@ -34,14 +39,14 @@ export async function createDeveloperKey(
 
   const rafikiKey = await rafikiClient.createRafikiWalletAddressKey(
     generateJwk(publicKey, keyId),
-    input.walletAddressId
+    walletAddress.id
   )
 
   const developerKey: DeveloperKey = {
     id: keyId,
     name: input.name,
     workspaceId: input.workspaceId,
-    walletAddressId: input.walletAddressId,
+    walletAddressId: walletAddress.id,
     rafikiId: rafikiKey.id,
     publicKey: publicKeyPem,
     status: 'ACTIVE',
@@ -55,7 +60,8 @@ export async function createDeveloperKey(
     key: developerKey,
     privateKey: privateKeyPem,
     publicKey: publicKeyPem,
-    keyId
+    keyId,
+    walletAddressUrl: walletAddress.url
   }
 }
 
@@ -67,6 +73,8 @@ export function listDeveloperKeysForWallet(
   workspaceId: string,
   walletAddressId: string
 ): DeveloperKey[] {
+  assertWalletAddressBelongsToWorkspace(walletAddressId, workspaceId)
+
   return listDeveloperKeysByWorkspace(workspaceId).filter(
     (key) => key.walletAddressId === walletAddressId
   )
@@ -75,6 +83,8 @@ export function listDeveloperKeysForWallet(
 export async function revokeDeveloperKey(
   input: RevokeDeveloperKeyInput
 ): Promise<DeveloperKey | undefined> {
+  assertWalletAddressBelongsToWorkspace(input.walletAddressId, input.workspaceId)
+
   const key = getDeveloperKeyById(input.keyId)
 
   if (
@@ -95,4 +105,25 @@ export async function revokeDeveloperKey(
   return updateDeveloperKey(key.id, {
     status: 'REVOKED'
   })
+}
+
+function assertWalletAddressBelongsToWorkspace(
+  walletAddressId: string,
+  workspaceId: string
+) {
+  const walletAddress = getWalletAddress(walletAddressId)
+
+  if (!walletAddress) {
+    throw new Error('WALLET_ADDRESS_NOT_FOUND')
+  }
+
+  if (walletAddress.fintechId !== workspaceId) {
+    throw new Error('WALLET_ADDRESS_WORKSPACE_MISMATCH')
+  }
+
+  if (walletAddress.status !== 'ACTIVE') {
+    throw new Error('WALLET_ADDRESS_INACTIVE')
+  }
+
+  return walletAddress
 }

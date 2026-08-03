@@ -1,4 +1,4 @@
-﻿export type DeveloperKeyStatus = 'ACTIVE' | 'REVOKED'
+export type DeveloperKeyStatus = 'ACTIVE' | 'REVOKED'
 
 export type DeveloperKey = {
   id: string
@@ -23,6 +23,7 @@ export type CreateDeveloperKeyResult = {
   privateKey: string
   publicKey: string
   keyId: string
+  walletAddressUrl: string
 }
 
 export type RevokeDeveloperKeyInput = {

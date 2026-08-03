@@ -73,9 +73,11 @@ async function notifyCore(payout: Payout): Promise<void> {
     {
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.PARTNER_ADAPTER_INTERNAL_API_KEY}`
       },
       timeout: 10_000
     }
   )
 }
+

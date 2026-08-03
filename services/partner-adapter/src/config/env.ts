@@ -12,6 +12,10 @@ const envSchema = z.object({
     .url()
     .default('http://localhost:5050'),
 
+  PARTNER_ADAPTER_INTERNAL_API_KEY: z
+    .string()
+    .default('dev_partner_adapter_internal_key'),
+
   KCB_BASE_URL: z
     .url()
     .default('https://uat.buni.kcbgroup.com/fundstransfer/1.0.0'),
@@ -66,3 +70,4 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>
 
 export const env: Env = envSchema.parse(process.env)
+

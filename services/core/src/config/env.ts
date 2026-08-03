@@ -12,6 +12,10 @@ const envSchema = z.object({
     .url()
     .default('http://localhost:5070'),
 
+  PARTNER_ADAPTER_INTERNAL_API_KEY: z
+    .string()
+    .default('dev_partner_adapter_internal_key'),
+
   MOJALY_WALLET_ADDRESS_BASE_URL: z
   .url()
   .default('https://pay.mojaly.local'),
@@ -56,3 +60,4 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>
 
 export const env: Env = envSchema.parse(process.env)
+

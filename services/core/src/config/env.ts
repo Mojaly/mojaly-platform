@@ -44,6 +44,10 @@ const envSchema = z.object({
     .string()
     .default('dev_identity_server_secret'),
 
+  RAFIKI_WEBHOOK_SIGNATURE_SECRET: z
+    .string()
+    .default('dev_rafiki_webhook_signature_secret'),
+
   MOJALY_OPEN_PAYMENTS_HOST: z
     .url()
     .default('https://mojaly.local')

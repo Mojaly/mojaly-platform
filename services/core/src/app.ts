@@ -1,4 +1,5 @@
 import Fastify from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
 import { healthRoutes } from './modules/health/health.routes.js'
 import { destinationResolutionRoutes } from './modules/destination-resolutions/destination-resolutions.routes.js'
 import { paymentIntentRoutes } from './modules/payment-intents/payment-intents.routes.js'
@@ -14,6 +15,8 @@ export function buildApp() {
     logger: true
   })
 
+  installJsonParser(app)
+
   app.register(healthRoutes)
   app.register(destinationResolutionRoutes)
   app.register(paymentIntentRoutes)
@@ -27,4 +30,20 @@ export function buildApp() {
   return app
 }
 
+function installJsonParser(app: FastifyInstance) {
+  app.removeContentTypeParser('application/json')
+  app.addContentTypeParser(
+    'application/json',
+    { parseAs: 'string' },
+    (request: FastifyRequest, body, done) => {
+      try {
+        const rawBody = body.toString()
+        const parsedBody = rawBody ? JSON.parse(rawBody) : {}
 
+        done(null, parsedBody)
+      } catch (error) {
+        done(error as Error)
+      }
+    }
+  )
+}

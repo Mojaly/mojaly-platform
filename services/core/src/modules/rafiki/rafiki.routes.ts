@@ -1,7 +1,8 @@
-﻿import type { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync } from 'fastify'
 import { createRafikiClient } from './rafiki.factory.js'
 import { handleRafikiWebhook } from './service.js'
 import { webhookSchema } from './validation.js'
+import { verifyRafikiWebhookSignature } from './webhook-signature.js'
 
 export const rafikiRoutes: FastifyPluginAsync = async (app) => {
   const rafikiClient = createRafikiClient()
@@ -15,6 +16,17 @@ export const rafikiRoutes: FastifyPluginAsync = async (app) => {
   })
 
   app.post('/rafiki/webhooks', async (request, reply) => {
+    const signature = verifyRafikiWebhookSignature(request)
+
+    if (!signature.valid) {
+      return reply.code(401).send({
+        error: {
+          code: 'INVALID_RAFIKI_SIGNATURE',
+          message: signature.reason
+        }
+      })
+    }
+
     const result = webhookSchema.safeParse(request.body)
 
     if (!result.success) {
@@ -34,4 +46,5 @@ export const rafikiRoutes: FastifyPluginAsync = async (app) => {
     })
   })
 }
+
 

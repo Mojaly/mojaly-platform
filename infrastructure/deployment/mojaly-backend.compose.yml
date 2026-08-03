@@ -1,0 +1,33 @@
+services:
+  core:
+    image: mojaly-core:test
+    env_file:
+      - ../../services/core/.env
+    ports:
+      - "5050:5050"
+    restart: unless-stopped
+
+  partner-adapter:
+    image: mojaly-partner-adapter:test
+    env_file:
+      - ../../services/partner-adapter/.env
+    environment:
+      MOJALY_CORE_URL: http://core:5050
+    ports:
+      - "5070:5070"
+    depends_on:
+      - core
+    restart: unless-stopped
+
+  api-gateway:
+    image: mojaly-api-gateway:test
+    env_file:
+      - ../../services/api-gateway/.env
+    environment:
+      CORE_API_URL: http://core:5050
+      PORT: 5060
+    ports:
+      - "5060:5060"
+    depends_on:
+      - core
+    restart: unless-stopped

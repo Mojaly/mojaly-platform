@@ -1,0 +1,17 @@
+meta {
+  name: 3. Generate API Key
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{mtn_base_url}}/v1_0/apiuser/{{mtn_api_user}}/apikey
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+  Ocp-Apim-Subscription-Key: {{mtn_subscription_key}}
+}

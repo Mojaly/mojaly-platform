@@ -1,0 +1,21 @@
+meta {
+  name: 4. Generate Disbursement Token
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{mtn_base_url}}/disbursement/token/
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: {{mtn_api_user}}
+  password: {{mtn_api_key}}
+}
+
+headers {
+  Accept: application/json
+  Ocp-Apim-Subscription-Key: {{mtn_subscription_key}}
+}

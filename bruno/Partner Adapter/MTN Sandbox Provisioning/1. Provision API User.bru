@@ -1,0 +1,24 @@
+meta {
+  name: 1. Provision API User
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{mtn_base_url}}/v1_0/apiuser
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+  Ocp-Apim-Subscription-Key: {{mtn_subscription_key}}
+  X-Reference-Id: {{mtn_api_user}}
+}
+
+body:json {
+  {
+    "providerCallbackHost": "{{mtn_callback_host}}"
+  }
+}

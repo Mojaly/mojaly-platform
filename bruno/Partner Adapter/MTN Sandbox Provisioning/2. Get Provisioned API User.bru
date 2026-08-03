@@ -1,0 +1,16 @@
+meta {
+  name: 2. Get Provisioned API User
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{mtn_base_url}}/v1_0/apiuser/{{mtn_api_user}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Ocp-Apim-Subscription-Key: {{mtn_subscription_key}}
+}

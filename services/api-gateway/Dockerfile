@@ -18,5 +18,5 @@ WORKDIR /app
 
 COPY --from=build /prod/api-gateway ./
 
-EXPOSE 5080
+EXPOSE 5060
 CMD ["node", "dist/server.js"]

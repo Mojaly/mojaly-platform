@@ -1,6 +1,6 @@
 services:
   core:
-    image: mojaly-core:test
+    image: ghcr.io/mojaly/mojaly-core:latest
     env_file:
       - ../../services/core/.env
     ports:
@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
 
   partner-adapter:
-    image: mojaly-partner-adapter:test
+    image: ghcr.io/mojaly/mojaly-partner-adapter:latest
     env_file:
       - ../../services/partner-adapter/.env
     environment:
@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   api-gateway:
-    image: mojaly-api-gateway:test
+    image: ghcr.io/mojaly/mojaly-api-gateway:latest
     env_file:
       - ../../services/api-gateway/.env
     environment:

@@ -1,0 +1,29 @@
+services:
+  nginx:
+    image: ${NGINX_IMAGE}
+    container_name: mojaly-rafiki-nginx
+    depends_on:
+      - rafiki-backend
+      - rafiki-auth
+      - rafiki-frontend
+      - kratos
+    ports:
+      - "${NGINX_HTTP_PORT}:80"
+      - "${NGINX_HTTPS_PORT}:443"
+    volumes:
+      - ${NGINX_CONFIG_FILE:-./nginx.conf}:/etc/nginx/conf.d/default.conf:ro
+      - ${NGINX_CERTS_DIR:-./certs}:/etc/nginx/certs:ro
+    networks:
+      rafiki:
+        aliases:
+          - mojaly.local
+          - auth.mojaly.local
+          - ilp.mojaly.local
+          - admin.mojaly.local
+          - pay.mojaly.com
+          - auth.mojaly.com
+          - ilp.mojaly.com
+          - admin.mojaly.com
+          - idp.mojaly.com
+    restart: unless-stopped
+

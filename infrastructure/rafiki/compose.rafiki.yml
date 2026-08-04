@@ -1,0 +1,110 @@
+services:
+  rafiki-auth:
+    image: ghcr.io/interledger/rafiki-auth:${RAFIKI_VERSION}
+    container_name: mojaly-rafiki-auth
+    environment:
+      ADMIN_API_SECRET: ${AUTH_ADMIN_API_SECRET}
+      OPERATOR_TENANT_ID: ${OPERATOR_TENANT_ID}
+      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL}
+      AUTH_SERVER_URL: ${AUTH_SERVER_URL}
+      ADMIN_PORT: ${AUTH_ADMIN_PORT}
+      AUTH_PORT: ${AUTH_PORT}
+      INTROSPECTION_PORT: ${INTROSPECTION_PORT}
+      INTERACTION_PORT: ${INTERACTION_PORT}
+      SERVICE_API_PORT: ${SERVICE_API_PORT}
+      COOKIE_KEY: ${COOKIE_KEY}
+      IDENTITY_SERVER_SECRET: ${IDENTITY_SERVER_SECRET}
+      IDENTITY_SERVER_URL: ${IDENTITY_SERVER_URL}
+      REDIS_URL: ${REDIS_URL}
+      TRUST_PROXY: ${TRUST_PROXY}
+      LOG_LEVEL: ${LOG_LEVEL}
+      NODE_ENV: ${NODE_ENV}
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rafiki
+    ports:
+      - "${AUTH_ADMIN_PORT}:${AUTH_ADMIN_PORT}"
+      - "${AUTH_PORT}:${AUTH_PORT}"
+      - "${INTROSPECTION_PORT}:${INTROSPECTION_PORT}"
+      - "${INTERACTION_PORT}:${INTERACTION_PORT}"
+      - "${SERVICE_API_PORT}:${SERVICE_API_PORT}"
+    restart: always
+
+  rafiki-backend:
+    image: ghcr.io/interledger/rafiki-backend:${RAFIKI_VERSION}
+    container_name: mojaly-rafiki-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      tigerbeetle:
+        condition: service_started
+    environment:
+      ADMIN_API_SECRET: ${BACKEND_ADMIN_API_SECRET}
+      OPERATOR_TENANT_ID: ${OPERATOR_TENANT_ID}
+      AUTH_SERVICE_API_URL: ${AUTH_SERVICE_API_URL}
+      AUTH_SERVER_GRANT_URL: ${AUTH_SERVER_GRANT_URL}
+      AUTH_SERVER_INTROSPECTION_URL: ${AUTH_SERVER_INTROSPECTION_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      ILP_ADDRESS: ${ILP_ADDRESS}
+      ILP_CONNECTOR_URL: ${ILP_CONNECTOR_URL}
+      OPEN_PAYMENTS_URL: ${OPEN_PAYMENTS_URL}
+      WALLET_ADDRESS_URL: ${WALLET_ADDRESS_URL}
+      EXCHANGE_RATES_URL: ${EXCHANGE_RATES_URL}
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      INSTANCE_NAME: ${INSTANCE_NAME}
+      TRUST_PROXY: ${TRUST_PROXY}
+      LOG_LEVEL: ${LOG_LEVEL}
+      NODE_ENV: ${NODE_ENV}
+      KEY_ID: ${KEY_ID}
+      USE_TIGERBEETLE: ${USE_TIGERBEETLE}
+      STREAM_SECRET: ${STREAM_SECRET}
+      TIGERBEETLE_CLUSTER_ID: ${TIGERBEETLE_CLUSTER_ID}
+      TIGERBEETLE_REPLICA_ADDRESSES: ${TIGERBEETLE_REPLICA_ADDRESSES}
+      ADMIN_PORT: ${BACKEND_ADMIN_PORT}
+      CONNECTOR_PORT: ${CONNECTOR_PORT}
+      OPEN_PAYMENTS_PORT: ${OPEN_PAYMENTS_PORT}
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      ADMIN_API_SIGNATURE_VERSION: ${ADMIN_API_SIGNATURE_VERSION}
+    networks:
+      - rafiki
+    ports:
+      - "${OPEN_PAYMENTS_PORT}:${OPEN_PAYMENTS_PORT}"
+      - "${BACKEND_ADMIN_PORT}:${BACKEND_ADMIN_PORT}"
+      - "${CONNECTOR_PORT}:${CONNECTOR_PORT}"
+    privileged: true
+    restart: always
+    volumes:
+      - ../temp/:/workspace/temp/
+
+  rafiki-frontend:
+    image: ghcr.io/interledger/rafiki-frontend:${RAFIKI_VERSION}
+    container_name: mojaly-rafiki-frontend
+    depends_on:
+      - rafiki-backend
+      - kratos
+    environment:
+      PORT: ${FRONTEND_PORT}
+      GRAPHQL_URL: ${GRAPHQL_URL}
+      OPEN_PAYMENTS_URL: ${FRONTEND_OPEN_PAYMENTS_URL}
+      AUTH_ENABLED: ${AUTH_ENABLED}
+      KRATOS_CONTAINER_PUBLIC_URL: ${KRATOS_CONTAINER_PUBLIC_URL}
+      KRATOS_BROWSER_PUBLIC_URL: ${KRATOS_BROWSER_PUBLIC_URL}
+      KRATOS_ADMIN_URL: ${KRATOS_ADMIN_URL}
+      ENABLE_INSECURE_MESSAGE_COOKIE: ${ENABLE_INSECURE_MESSAGE_COOKIE}
+      SIGNATURE_VERSION: ${SIGNATURE_VERSION}
+      LOG_LEVEL: ${LOG_LEVEL}
+      NODE_ENV: ${NODE_ENV}
+    networks:
+      - rafiki
+    restart: always
+    privileged: true
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"

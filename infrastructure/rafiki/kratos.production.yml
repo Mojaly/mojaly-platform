@@ -1,0 +1,95 @@
+version: v0.13.0
+
+dsn: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/mojaly_kratos?sslmode=disable&max_conns=20&max_idle_conns=4
+
+serve:
+  public:
+    base_url: ${KRATOS_PUBLIC_URL}
+    cors:
+      enabled: true
+  admin:
+    base_url: http://kratos:4434/
+
+selfservice:
+  default_browser_return_url: ${KRATOS_BROWSER_URL}/
+  allowed_return_urls:
+    - ${KRATOS_BROWSER_URL}
+
+  methods:
+    link:
+      config:
+        lifespan: 1h
+        base_url: ${KRATOS_LINK_BASE_URL}
+      enabled: true
+    password:
+      enabled: true
+
+  flows:
+    error:
+      ui_url: ${KRATOS_ERROR_UI_URL}
+
+    settings:
+      ui_url: ${KRATOS_SETTINGS_UI_URL}
+      privileged_session_max_age: 15m
+      required_aal: highest_available
+
+    recovery:
+      enabled: true
+      ui_url: ${KRATOS_RECOVERY_UI_URL}
+      use: link
+      after:
+        hooks:
+          - hook: revoke_active_sessions
+
+    verification:
+      enabled: false
+
+    logout:
+      after:
+        default_browser_return_url: ${KRATOS_LOGOUT_RETURN_URL}
+
+    login:
+      ui_url: ${KRATOS_LOGIN_UI_URL}
+      lifespan: 10m
+
+    registration:
+      enabled: false
+
+log:
+  level: info
+  format: json
+  leak_sensitive_values: false
+
+secrets:
+  cookie:
+    - ${KRATOS_COOKIE_SECRET}
+  cipher:
+    - ${KRATOS_CIPHER_SECRET}
+
+ciphers:
+  algorithm: xchacha20-poly1305
+
+hashers:
+  algorithm: bcrypt
+  bcrypt:
+    cost: 10
+
+identity:
+  schemas:
+    - id: default
+      url: file:///etc/config/kratos/identity.schema.json
+
+courier:
+  smtp:
+    connection_uri: ${KRATOS_SMTP_CONNECTION_URI}
+
+session:
+  lifespan: 1h
+  cookie:
+    persistent: false
+    same_site: Strict
+    path: /
+
+
+
+

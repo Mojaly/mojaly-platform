@@ -1,0 +1,21 @@
+name: mojaly-rafiki
+
+include:
+  - compose.postgres.yml
+  - compose.redis.yml
+  - compose.tigerbeetle.yml
+  - compose.kratos.yml
+  - compose.rafiki.yml
+  - compose.nginx.yml
+
+networks:
+  rafiki:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${RAFIKI_NETWORK_SUBNET}
+          gateway: ${RAFIKI_NETWORK_GATEWAY}
+
+volumes:
+  pg-data:
+  tigerbeetle-data:

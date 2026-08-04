@@ -1,0 +1,34 @@
+services:
+  kratos:
+    image: ${KRATOS_IMAGE}
+    container_name: mojaly-rafiki-kratos
+    privileged: true
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      KRATOS_COOKIE_SECRET: ${KRATOS_COOKIE_SECRET}
+      KRATOS_CIPHER_SECRET: ${KRATOS_CIPHER_SECRET}
+      KRATOS_PUBLIC_URL: ${KRATOS_PUBLIC_URL}
+      KRATOS_BROWSER_URL: ${KRATOS_BROWSER_URL}
+      KRATOS_LINK_BASE_URL: ${KRATOS_LINK_BASE_URL}
+      KRATOS_ERROR_UI_URL: ${KRATOS_ERROR_UI_URL}
+      KRATOS_SETTINGS_UI_URL: ${KRATOS_SETTINGS_UI_URL}
+      KRATOS_RECOVERY_UI_URL: ${KRATOS_RECOVERY_UI_URL}
+      KRATOS_LOGOUT_RETURN_URL: ${KRATOS_LOGOUT_RETURN_URL}
+      KRATOS_LOGIN_UI_URL: ${KRATOS_LOGIN_UI_URL}
+      KRATOS_SMTP_CONNECTION_URI: ${KRATOS_SMTP_CONNECTION_URI}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "4433:4433"
+      - "4434:4434"
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./identity.schema.json:/etc/config/kratos/identity.schema.json
+      - ${KRATOS_CONFIG_FILE:-./kratos.yml}:/etc/config/kratos/kratos.yml
+    entrypoint: ["/entrypoint.sh"]
+    networks:
+      - rafiki
+
+
+

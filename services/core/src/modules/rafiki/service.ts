@@ -110,7 +110,7 @@ async function handleIncomingPaymentCompleted(data: IncomingPaymentCompletedData
     }
   }
 
-  const account = findAccountForFintechPartnerAsset({
+  const account = await findAccountForFintechPartnerAsset({
     fintechId: intent.fintechId,
     partnerCode: intent.partnerCode,
     assetCode: data.receivedAmount.assetCode,
@@ -125,7 +125,7 @@ async function handleIncomingPaymentCompleted(data: IncomingPaymentCompletedData
     }
   }
 
-  const transaction = createTransaction({
+  const transaction = await createTransaction({
     paymentId: data.id,
     accountId: account.id,
     walletAddressId: data.walletAddressId,
@@ -176,7 +176,7 @@ async function handleOutgoingPaymentCreated(
     }
   }
 
-  const account = findAccountForFintechPartnerAsset({
+  const account = await findAccountForFintechPartnerAsset({
     fintechId: intent.fintechId,
     partnerCode: intent.partnerCode,
     assetCode: data.debitAmount.assetCode,
@@ -196,7 +196,7 @@ async function handleOutgoingPaymentCreated(
     }
   }
 
-  const transaction = createTransaction({
+  const transaction = await createTransaction({
     paymentId: data.id,
     accountId: account.id,
     walletAddressId: data.walletAddressId,

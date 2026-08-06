@@ -1,4 +1,4 @@
-﻿import { randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { findAccountForFintechPartnerAsset } from '../account/account.store.js'
 import { getAccountBalance } from '../account/account.service.js'
 import type { CreateDestinationResolutionInput } from './destination-resolutions.schemas.js'
@@ -115,7 +115,7 @@ async function assertSpendCapacity(input: {
   assetScale: number
   requiredAmount: string
 }) {
-  const account = findAccountForFintechPartnerAsset({
+  const account = await findAccountForFintechPartnerAsset({
     fintechId: input.fintechId,
     partnerCode: input.partnerCode,
     assetCode: input.assetCode,
@@ -178,3 +178,4 @@ export function mapDestinationResolutionError(error: unknown) {
 
   return undefined
 }
+

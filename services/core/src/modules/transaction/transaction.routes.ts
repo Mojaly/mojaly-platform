@@ -1,4 +1,4 @@
-﻿import type { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync } from 'fastify'
 import {
   accountTransactionsParamsSchema,
   createTransactionSchema,
@@ -29,7 +29,7 @@ export const transactionRoutes: FastifyPluginAsync = async (app) => {
 
     try {
       return reply.code(201).send({
-        data: createTransaction(result.data)
+        data: await createTransaction(result.data)
       })
     } catch (error) {
       if (error instanceof Error && error.message === 'ACCOUNT_NOT_FOUND') {
@@ -127,3 +127,4 @@ export const transactionRoutes: FastifyPluginAsync = async (app) => {
     }
   })
 }
+

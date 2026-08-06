@@ -53,24 +53,24 @@ export async function createAccount(input: CreateAccountInput): Promise<Account>
   return saveAccount(account)
 }
 
-export function getAccount(id: string): Account | undefined {
+export async function getAccount(id: string): Promise<Account | undefined> {
   return getAccountById(id)
 }
 
-export function getAccounts(): Account[] {
+export async function getAccounts(): Promise<Account[]> {
   return listAccounts()
 }
 
-export function getWorkspaceAccounts(workspaceId: string): Account[] {
+export async function getWorkspaceAccounts(workspaceId: string): Promise<Account[]> {
   return listAccountsByWorkspace(workspaceId)
 }
 
-export function getFintechAccounts(fintechId: string): Account[] {
+export async function getFintechAccounts(fintechId: string): Promise<Account[]> {
   return listAccountsByFintech(fintechId)
 }
 
 export async function getAccountBalance(id: string) {
-  const account = getAccountById(id)
+  const account = await getAccountById(id)
 
   if (!account) {
     throw new Error('ACCOUNT_NOT_FOUND')
@@ -89,4 +89,3 @@ export async function getAccountBalance(id: string) {
     balance: balanceResponse.data
   }
 }
-

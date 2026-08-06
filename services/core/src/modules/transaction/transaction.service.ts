@@ -1,4 +1,4 @@
-﻿import { randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { getAccountById } from '../account/account.store.js'
 import {
   findTransactionByPaymentId,
@@ -14,8 +14,8 @@ import type {
   UpdateTransactionStatusInput
 } from './transaction.types.js'
 
-export function createTransaction(input: CreateTransactionInput): Transaction {
-  const account = getAccountById(input.accountId)
+export async function createTransaction(input: CreateTransactionInput): Promise<Transaction> {
+  const account = await getAccountById(input.accountId)
 
   if (!account) {
     throw new Error('ACCOUNT_NOT_FOUND')
@@ -103,3 +103,4 @@ export function updateTransactionStatus(
 
   return saveTransaction(updated)
 }
+

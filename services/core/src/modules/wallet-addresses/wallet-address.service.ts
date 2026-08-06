@@ -31,7 +31,7 @@ function buildWalletAddressUrl(
 export async function createWalletAddress(
   input: CreateWalletAddressInput
 ): Promise<WalletAddress> {
-  const account = getAccount(input.accountId)
+  const account = await getAccount(input.accountId)
 
   if (!account) {
     throw new Error('ACCOUNT_NOT_FOUND')
@@ -109,3 +109,4 @@ export function getWorkspaceWalletAddresses(
 export function getFintechWalletAddresses(fintechId: string): WalletAddress[] {
   return listWalletAddressesByFintech(fintechId)
 }
+

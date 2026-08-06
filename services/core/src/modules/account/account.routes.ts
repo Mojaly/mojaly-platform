@@ -95,7 +95,7 @@ export const accountRoutes: FastifyPluginAsync = async (app) => {
 
   app.get('/accounts', async () => {
     return {
-      data: getAccounts()
+      data: await getAccounts()
     }
   })
 
@@ -136,7 +136,7 @@ export const accountRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    const account = getAccount(result.data.id)
+    const account = await getAccount(result.data.id)
 
     if (!account) {
       return reply.code(404).send({
@@ -166,7 +166,7 @@ export const accountRoutes: FastifyPluginAsync = async (app) => {
     }
 
     return {
-      data: getWorkspaceAccounts(result.data.workspaceId)
+      data: await getWorkspaceAccounts(result.data.workspaceId)
     }
   })
 
@@ -184,9 +184,10 @@ export const accountRoutes: FastifyPluginAsync = async (app) => {
     }
 
     return {
-      data: getFintechAccounts(result.data.fintechId)
+      data: await getFintechAccounts(result.data.fintechId)
     }
   })
 }
+
 
 

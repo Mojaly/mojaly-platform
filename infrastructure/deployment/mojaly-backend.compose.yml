@@ -1,10 +1,32 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: mojaly-postgres
+    environment:
+      POSTGRES_DB: ${MOJALY_POSTGRES_DB:-mojaly}
+      POSTGRES_USER: ${MOJALY_POSTGRES_USER:-mojaly}
+      POSTGRES_PASSWORD: ${MOJALY_POSTGRES_PASSWORD:-mojaly_change_me}
+    volumes:
+      - mojaly-postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MOJALY_POSTGRES_USER:-mojaly} -d ${MOJALY_POSTGRES_DB:-mojaly}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
   core:
     image: ghcr.io/mojaly/mojaly-core:latest
     env_file:
       - ../../services/core/.env
+    environment:
+      DATABASE_URL: postgres://${MOJALY_POSTGRES_USER:-mojaly}:${MOJALY_POSTGRES_PASSWORD:-mojaly_change_me}@postgres:5432/${MOJALY_POSTGRES_DB:-mojaly}
     ports:
       - "5050:5050"
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   partner-adapter:
@@ -16,7 +38,8 @@ services:
     ports:
       - "5070:5070"
     depends_on:
-      - core
+      core:
+        condition: service_started
     restart: unless-stopped
 
   api-gateway:
@@ -29,6 +52,9 @@ services:
     ports:
       - "5060:5060"
     depends_on:
-      - core
+      core:
+        condition: service_started
     restart: unless-stopped
 
+volumes:
+  mojaly-postgres-data:

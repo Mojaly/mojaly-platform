@@ -31,12 +31,12 @@ export const workspaceRoutes: FastifyPluginAsync = async (app) => {
     }
 
     return reply.code(201).send({
-      data: createWorkspace(result.data)
+      data: await createWorkspace(result.data)
     })
   })
 
   app.get('/workspaces', async () => {
-    return { data: getWorkspaces() }
+    return { data: await getWorkspaces() }
   })
 
   app.get('/workspaces/:id', async (request, reply) => {
@@ -52,7 +52,7 @@ export const workspaceRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    const workspace = getWorkspace(params.data.id)
+    const workspace = await getWorkspace(params.data.id)
 
     if (!workspace) {
       return reply.code(404).send({
@@ -85,7 +85,7 @@ export const workspaceRoutes: FastifyPluginAsync = async (app) => {
 
     try {
       return reply.code(201).send({
-        data: submitWorkspaceKyb(params.data.id, body.data)
+        data: await submitWorkspaceKyb(params.data.id, body.data)
       })
     } catch (error) {
       return mapWorkspaceError(error, reply)
@@ -106,7 +106,7 @@ export const workspaceRoutes: FastifyPluginAsync = async (app) => {
     }
 
     try {
-      const kyb = getWorkspaceKyb(params.data.id)
+      const kyb = await getWorkspaceKyb(params.data.id)
 
       if (!kyb) {
         return reply.code(404).send({
@@ -137,7 +137,7 @@ export const workspaceRoutes: FastifyPluginAsync = async (app) => {
     }
 
     try {
-      return { data: approveWorkspace(params.data.id) }
+      return { data: await approveWorkspace(params.data.id) }
     } catch (error) {
       return mapWorkspaceError(error, reply)
     }
@@ -161,7 +161,7 @@ export const workspaceRoutes: FastifyPluginAsync = async (app) => {
     }
 
     try {
-      return { data: rejectWorkspace(params.data.id, body.data.reason) }
+      return { data: await rejectWorkspace(params.data.id, body.data.reason) }
     } catch (error) {
       return mapWorkspaceError(error, reply)
     }
@@ -181,7 +181,7 @@ export const workspaceRoutes: FastifyPluginAsync = async (app) => {
     }
 
     try {
-      return { data: suspendWorkspace(params.data.id) }
+      return { data: await suspendWorkspace(params.data.id) }
     } catch (error) {
       return mapWorkspaceError(error, reply)
     }

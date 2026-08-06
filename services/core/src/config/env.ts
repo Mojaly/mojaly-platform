@@ -8,6 +8,8 @@ const envSchema = z.object({
 
   PORT: z.coerce.number().int().positive().default(5050),
 
+  DATABASE_URL: z
+    .url(),
   PARTNER_ADAPTER_URL: z
     .url()
     .default('http://localhost:5070'),
@@ -17,12 +19,12 @@ const envSchema = z.object({
     .default('dev_partner_adapter_internal_key'),
 
   MOJALY_WALLET_ADDRESS_BASE_URL: z
-  .url()
-  .default('https://pay.mojaly.local'),
+    .url()
+    .default('https://pay.mojaly.local'),
 
   RAFIKI_BACKEND_GRAPHQL_URL: z
-  .url()
-  .default('https://mojaly.local/graphql'),
+    .url()
+    .default('https://mojaly.local/graphql'),
 
   RAFIKI_AUTH_GRAPHQL_URL: z
     .url()
@@ -60,4 +62,3 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>
 
 export const env: Env = envSchema.parse(process.env)
-

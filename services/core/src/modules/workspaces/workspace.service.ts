@@ -13,7 +13,9 @@ import type {
   WorkspaceKybSubmission
 } from './workspace.types.js'
 
-export function createWorkspace(input: CreateWorkspaceInput): Workspace {
+export async function createWorkspace(
+  input: CreateWorkspaceInput
+): Promise<Workspace> {
   const now = new Date().toISOString()
 
   const workspace: Workspace = {
@@ -35,19 +37,19 @@ export function createWorkspace(input: CreateWorkspaceInput): Workspace {
   return saveWorkspace(workspace)
 }
 
-export function getWorkspace(id: string): Workspace | undefined {
+export async function getWorkspace(id: string): Promise<Workspace | undefined> {
   return getWorkspaceById(id)
 }
 
-export function getWorkspaces(): Workspace[] {
+export async function getWorkspaces(): Promise<Workspace[]> {
   return listWorkspaces()
 }
 
-export function submitWorkspaceKyb(
+export async function submitWorkspaceKyb(
   workspaceId: string,
   input: SubmitKybInput
-): { workspace: Workspace; kyb: WorkspaceKybSubmission } {
-  const workspace = requireWorkspace(workspaceId)
+): Promise<{ workspace: Workspace; kyb: WorkspaceKybSubmission }> {
+  const workspace = await requireWorkspace(workspaceId)
 
   if (workspace.status === 'REJECTED') {
     throw new Error('WORKSPACE_REJECTED')
@@ -58,7 +60,7 @@ export function submitWorkspaceKyb(
   }
 
   const now = new Date().toISOString()
-  const kyb = saveKybSubmission({
+  const kybInput: WorkspaceKybSubmission = {
     workspaceId,
     submittedAt: now,
     registrationNumber: input.registrationNumber,
@@ -68,17 +70,19 @@ export function submitWorkspaceKyb(
     ),
     contactName: input.contactName,
     contactEmail: input.contactEmail
-  })
+  }
 
   if (input.taxId) {
-    kyb.taxId = input.taxId
+    kybInput.taxId = input.taxId
   }
 
   if (input.website) {
-    kyb.website = input.website
+    kybInput.website = input.website
   }
 
-  const updated = saveWorkspace({
+  const kyb = await saveKybSubmission(kybInput)
+
+  const updated = await saveWorkspace({
     ...workspace,
     kybStatus: 'SUBMITTED',
     updatedAt: now
@@ -87,15 +91,15 @@ export function submitWorkspaceKyb(
   return { workspace: updated, kyb }
 }
 
-export function getWorkspaceKyb(
+export async function getWorkspaceKyb(
   workspaceId: string
-): WorkspaceKybSubmission | undefined {
-  requireWorkspace(workspaceId)
+): Promise<WorkspaceKybSubmission | undefined> {
+  await requireWorkspace(workspaceId)
   return getKybSubmission(workspaceId)
 }
 
-export function approveWorkspace(workspaceId: string): Workspace {
-  const workspace = requireWorkspace(workspaceId)
+export async function approveWorkspace(workspaceId: string): Promise<Workspace> {
+  const workspace = await requireWorkspace(workspaceId)
 
   if (workspace.kybStatus !== 'SUBMITTED') {
     throw new Error('KYB_NOT_SUBMITTED')
@@ -112,8 +116,11 @@ export function approveWorkspace(workspaceId: string): Workspace {
   })
 }
 
-export function rejectWorkspace(workspaceId: string, reason: string): Workspace {
-  const workspace = requireWorkspace(workspaceId)
+export async function rejectWorkspace(
+  workspaceId: string,
+  reason: string
+): Promise<Workspace> {
+  const workspace = await requireWorkspace(workspaceId)
   const now = new Date().toISOString()
 
   return saveWorkspace({
@@ -126,8 +133,10 @@ export function rejectWorkspace(workspaceId: string, reason: string): Workspace 
   })
 }
 
-export function suspendWorkspace(workspaceId: string): Workspace {
-  const workspace = requireWorkspace(workspaceId)
+export async function suspendWorkspace(
+  workspaceId: string
+): Promise<Workspace> {
+  const workspace = await requireWorkspace(workspaceId)
   const now = new Date().toISOString()
 
   return saveWorkspace({
@@ -138,8 +147,8 @@ export function suspendWorkspace(workspaceId: string): Workspace {
   })
 }
 
-function requireWorkspace(workspaceId: string): Workspace {
-  const workspace = getWorkspaceById(workspaceId)
+async function requireWorkspace(workspaceId: string): Promise<Workspace> {
+  const workspace = await getWorkspaceById(workspaceId)
 
   if (!workspace) {
     throw new Error('WORKSPACE_NOT_FOUND')

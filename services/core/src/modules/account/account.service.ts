@@ -10,7 +10,7 @@ import {
 } from './account.store.js'
 import type { Account, CreateAccountInput } from './account.types.js'
 
-export function createAccount(input: CreateAccountInput): Account {
+export async function createAccount(input: CreateAccountInput): Promise<Account> {
   const workspaceId = input.workspaceId ?? input.fintechId
 
   if (!workspaceId) {
@@ -18,7 +18,7 @@ export function createAccount(input: CreateAccountInput): Account {
   }
 
   if (input.workspaceId) {
-    const workspace = getWorkspace(input.workspaceId)
+    const workspace = await getWorkspace(input.workspaceId)
 
     if (!workspace) {
       throw new Error('WORKSPACE_NOT_FOUND')
@@ -89,3 +89,4 @@ export async function getAccountBalance(id: string) {
     balance: balanceResponse.data
   }
 }
+

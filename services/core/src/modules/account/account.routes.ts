@@ -57,7 +57,7 @@ export const accountRoutes: FastifyPluginAsync = async (app) => {
 
     try {
       return reply.code(201).send({
-        data: createAccount(result.data)
+        data: await createAccount(result.data)
       })
     } catch (error) {
       return mapAccountError(error, reply)
@@ -83,7 +83,7 @@ export const accountRoutes: FastifyPluginAsync = async (app) => {
 
     try {
       return reply.code(201).send({
-        data: createAccount({
+        data: await createAccount({
           ...body.data,
           workspaceId: params.data.workspaceId
         })
@@ -188,3 +188,5 @@ export const accountRoutes: FastifyPluginAsync = async (app) => {
     }
   })
 }
+
+

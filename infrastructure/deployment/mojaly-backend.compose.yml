@@ -9,6 +9,8 @@ services:
     volumes:
       - mojaly-postgres-data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - '127.0.0.1:5433:5432'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${MOJALY_POSTGRES_USER:-mojaly} -d ${MOJALY_POSTGRES_DB:-mojaly}"]
       interval: 5s
@@ -58,3 +60,4 @@ services:
 
 volumes:
   mojaly-postgres-data:
+

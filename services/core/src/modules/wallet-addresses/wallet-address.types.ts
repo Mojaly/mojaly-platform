@@ -3,6 +3,7 @@ export type WalletAddressStatus = 'ACTIVE' | 'INACTIVE'
 export type WalletAddress = {
   id: string
   accountId: string
+  workspaceId: string
   fintechId: string
   url: string
   publicName: string
@@ -16,6 +17,7 @@ export type WalletAddress = {
 
 export type CreateWalletAddressInput = {
   accountId: string
+  workspaceId?: string | undefined
   walletAddressName: string
   publicName: string
 }

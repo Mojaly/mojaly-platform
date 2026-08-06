@@ -27,6 +27,14 @@ export function listWalletAddressesByAccount(accountId: string): WalletAddress[]
   )
 }
 
+export function listWalletAddressesByWorkspace(
+  workspaceId: string
+): WalletAddress[] {
+  return listWalletAddresses().filter(
+    (walletAddress) => walletAddress.workspaceId === workspaceId
+  )
+}
+
 export function listWalletAddressesByFintech(fintechId: string): WalletAddress[] {
   return listWalletAddresses().filter(
     (walletAddress) => walletAddress.fintechId === fintechId

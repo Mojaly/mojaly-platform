@@ -1,4 +1,4 @@
-﻿import type { Account } from './account.types.js'
+import type { Account } from './account.types.js'
 
 const accounts = new Map<string, Account>()
 
@@ -15,6 +15,10 @@ export function listAccounts(): Account[] {
   return Array.from(accounts.values())
 }
 
+export function listAccountsByWorkspace(workspaceId: string): Account[] {
+  return listAccounts().filter((account) => account.workspaceId === workspaceId)
+}
+
 export function listAccountsByFintech(fintechId: string): Account[] {
   return listAccounts().filter((account) => account.fintechId === fintechId)
 }
@@ -29,6 +33,7 @@ export function findAccountByExternalPartnerAccount(
       account.externalPartnerAccountId === externalPartnerAccountId
   )
 }
+
 export function findAccountForFintechPartnerAsset(input: {
   fintechId: string
   partnerCode: string

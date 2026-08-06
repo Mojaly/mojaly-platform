@@ -1,7 +1,8 @@
-﻿export type AccountStatus = 'ACTIVE' | 'INACTIVE'
+export type AccountStatus = 'ACTIVE' | 'INACTIVE'
 
 export type Account = {
   id: string
+  workspaceId: string
   fintechId: string
   name: string
   partnerCode: string
@@ -15,7 +16,8 @@ export type Account = {
 }
 
 export type CreateAccountInput = {
-  fintechId: string
+  workspaceId?: string | undefined
+  fintechId?: string | undefined
   name: string
   partnerCode: string
   externalPartnerAccountId: string

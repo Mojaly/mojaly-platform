@@ -1,0 +1,28 @@
+meta {
+  name: Submit KYB
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{core_base_url}}/workspaces/{{workspace_id}}/submit-kyb
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "registrationNumber": "PVT-JANJA-001",
+    "taxId": "P051234567A",
+    "registeredAddress": "Westlands, Nairobi, Kenya",
+    "operatingCountries": ["KE", "UG"],
+    "website": "https://janjapay.test",
+    "contactName": "JanjaPay Operations",
+    "contactEmail": "ops@janjapay.test"
+  }
+}

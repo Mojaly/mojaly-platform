@@ -1,0 +1,15 @@
+meta {
+  name: Get KYB
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{core_base_url}}/workspaces/{{workspace_id}}/kyb
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

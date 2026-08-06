@@ -1,0 +1,15 @@
+meta {
+  name: Approve Workspace
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{core_base_url}}/workspaces/{{workspace_id}}/approve
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

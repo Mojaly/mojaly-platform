@@ -3,14 +3,17 @@ import {
   accountWalletAddressesParamsSchema,
   createWalletAddressBodySchema,
   fintechWalletAddressesParamsSchema,
-  walletAddressIdParamsSchema
+  walletAddressIdParamsSchema,
+  workspaceAccountWalletAddressesParamsSchema,
+  workspaceWalletAddressesParamsSchema
 } from './wallet-address.schemas.js'
 import {
   createWalletAddress,
   getAccountWalletAddresses,
   getFintechWalletAddresses,
   getWalletAddress,
-  getWalletAddresses
+  getWalletAddresses,
+  getWorkspaceWalletAddresses
 } from './wallet-address.service.js'
 
 function mapWalletAddressError(error: unknown, reply: FastifyReply) {
@@ -20,6 +23,7 @@ function mapWalletAddressError(error: unknown, reply: FastifyReply) {
 
   const statusByCode: Record<string, number> = {
     ACCOUNT_NOT_FOUND: 404,
+    ACCOUNT_WORKSPACE_MISMATCH: 403,
     ACCOUNT_INACTIVE: 409,
     ACCOUNT_RAFIKI_ASSET_MISSING: 409,
     WALLET_ADDRESS_ALREADY_EXISTS: 409,
@@ -71,6 +75,42 @@ export const walletAddressRoutes: FastifyPluginAsync = async (app) => {
     }
   })
 
+  app.post(
+    '/workspaces/:workspaceId/accounts/:accountId/wallet-addresses',
+    async (request, reply) => {
+      const params = workspaceAccountWalletAddressesParamsSchema.safeParse(
+        request.params
+      )
+      const body = createWalletAddressBodySchema.safeParse(request.body)
+
+      if (!params.success || !body.success) {
+        return reply.code(400).send({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid workspace wallet address request',
+            details: {
+              params: params.success ? undefined : params.error.flatten(),
+              body: body.success ? undefined : body.error.flatten()
+            }
+          }
+        })
+      }
+
+      try {
+        const walletAddress = await createWalletAddress({
+          workspaceId: params.data.workspaceId,
+          accountId: params.data.accountId,
+          walletAddressName: body.data.walletAddressName,
+          publicName: body.data.publicName
+        })
+
+        return reply.code(201).send({ data: walletAddress })
+      } catch (error) {
+        return mapWalletAddressError(error, reply)
+      }
+    }
+  )
+
   app.get('/wallet-addresses', async () => {
     return { data: getWalletAddresses() }
   })
@@ -116,6 +156,22 @@ export const walletAddressRoutes: FastifyPluginAsync = async (app) => {
     }
 
     return { data: getAccountWalletAddresses(result.data.accountId) }
+  })
+
+  app.get('/workspaces/:workspaceId/wallet-addresses', async (request, reply) => {
+    const result = workspaceWalletAddressesParamsSchema.safeParse(request.params)
+
+    if (!result.success) {
+      return reply.code(400).send({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid workspace id',
+          details: result.error.flatten()
+        }
+      })
+    }
+
+    return { data: getWorkspaceWalletAddresses(result.data.workspaceId) }
   })
 
   app.get('/fintechs/:fintechId/wallet-addresses', async (request, reply) => {

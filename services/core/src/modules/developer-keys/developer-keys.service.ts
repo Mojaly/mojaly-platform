@@ -117,7 +117,7 @@ function assertWalletAddressBelongsToWorkspace(
     throw new Error('WALLET_ADDRESS_NOT_FOUND')
   }
 
-  if (walletAddress.fintechId !== workspaceId) {
+  if (walletAddress.workspaceId !== workspaceId) {
     throw new Error('WALLET_ADDRESS_WORKSPACE_MISMATCH')
   }
 

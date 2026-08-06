@@ -35,10 +35,19 @@ export const accountWalletAddressesParamsSchema = z.object({
   accountId: z.string().min(1)
 })
 
+export const workspaceAccountWalletAddressesParamsSchema = z.object({
+  workspaceId: z.string().min(1),
+  accountId: z.string().min(1)
+})
+
 export const walletAddressIdParamsSchema = z.object({
   id: z.string().min(1)
 })
 
 export const fintechWalletAddressesParamsSchema = z.object({
   fintechId: z.string().min(1)
+})
+
+export const workspaceWalletAddressesParamsSchema = z.object({
+  workspaceId: z.string().min(1)
 })

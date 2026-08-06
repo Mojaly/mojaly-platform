@@ -8,6 +8,7 @@ import {
   listWalletAddresses,
   listWalletAddressesByAccount,
   listWalletAddressesByFintech,
+  listWalletAddressesByWorkspace,
   saveWalletAddress
 } from './wallet-address.store.js'
 import type {
@@ -34,6 +35,10 @@ export async function createWalletAddress(
 
   if (!account) {
     throw new Error('ACCOUNT_NOT_FOUND')
+  }
+
+  if (input.workspaceId && account.workspaceId !== input.workspaceId) {
+    throw new Error('ACCOUNT_WORKSPACE_MISMATCH')
   }
 
   if (account.status !== 'ACTIVE') {
@@ -68,6 +73,7 @@ export async function createWalletAddress(
   const walletAddress: WalletAddress = {
     id: rafikiWalletAddress.id,
     accountId: account.id,
+    workspaceId: account.workspaceId,
     fintechId: account.fintechId,
     url: rafikiWalletAddress.address,
     publicName: input.publicName,
@@ -92,6 +98,12 @@ export function getWalletAddresses(): WalletAddress[] {
 
 export function getAccountWalletAddresses(accountId: string): WalletAddress[] {
   return listWalletAddressesByAccount(accountId)
+}
+
+export function getWorkspaceWalletAddresses(
+  workspaceId: string
+): WalletAddress[] {
+  return listWalletAddressesByWorkspace(workspaceId)
 }
 
 export function getFintechWalletAddresses(fintechId: string): WalletAddress[] {

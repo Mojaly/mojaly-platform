@@ -1,0 +1,27 @@
+meta {
+  name: Create Workspace Account
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{core_base_url}}/workspaces/{{workspace_id}}/accounts
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "JanjaPay Griffin GBP",
+    "partnerCode": "GRIFFIN",
+    "externalPartnerAccountId": "ba.O3MN5dnrUBmCdfMbJcHS0w",
+    "rafikiAssetId": "c69e69bf-5d39-4ca0-a955-26301aaf01ac",
+    "assetCode": "GBP",
+    "assetScale": 2
+  }
+}

@@ -1,0 +1,15 @@
+meta {
+  name: List Workspace Wallet Addresses
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{core_base_url}}/workspaces/{{workspace_id}}/wallet-addresses
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

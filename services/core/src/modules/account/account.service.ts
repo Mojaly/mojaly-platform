@@ -1,19 +1,41 @@
-﻿import { randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { getPartnerAccountBalance } from '../../clients/partner-adapter.client.js'
+import { getWorkspace } from '../workspaces/workspace.service.js'
 import {
   getAccountById,
   listAccounts,
   listAccountsByFintech,
+  listAccountsByWorkspace,
   saveAccount
 } from './account.store.js'
 import type { Account, CreateAccountInput } from './account.types.js'
 
 export function createAccount(input: CreateAccountInput): Account {
+  const workspaceId = input.workspaceId ?? input.fintechId
+
+  if (!workspaceId) {
+    throw new Error('ACCOUNT_WORKSPACE_REQUIRED')
+  }
+
+  if (input.workspaceId) {
+    const workspace = getWorkspace(input.workspaceId)
+
+    if (!workspace) {
+      throw new Error('WORKSPACE_NOT_FOUND')
+    }
+
+    if (workspace.status !== 'ACTIVE') {
+      throw new Error('WORKSPACE_NOT_ACTIVE')
+    }
+  }
+
   const now = new Date().toISOString()
 
   const account: Account = {
     id: randomUUID(),
-    fintechId: input.fintechId,
+    workspaceId,
+    // fintechId is kept as a compatibility alias until older flows move fully to workspaceId.
+    fintechId: workspaceId,
     name: input.name,
     partnerCode: input.partnerCode,
     externalPartnerAccountId: input.externalPartnerAccountId,
@@ -39,9 +61,14 @@ export function getAccounts(): Account[] {
   return listAccounts()
 }
 
+export function getWorkspaceAccounts(workspaceId: string): Account[] {
+  return listAccountsByWorkspace(workspaceId)
+}
+
 export function getFintechAccounts(fintechId: string): Account[] {
   return listAccountsByFintech(fintechId)
 }
+
 export async function getAccountBalance(id: string) {
   const account = getAccountById(id)
 
@@ -49,7 +76,7 @@ export async function getAccountBalance(id: string) {
     throw new Error('ACCOUNT_NOT_FOUND')
   }
 
-  // Like Testnet asks GateHub, Mojaly asks the backing partner for spend capacity.
+  // Like Testnet asks its backing provider, Mojaly asks the backing partner for spend capacity.
   const balanceResponse = await getPartnerAccountBalance({
     partnerCode: account.partnerCode,
     externalAccountId: account.externalPartnerAccountId,

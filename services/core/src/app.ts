@@ -9,6 +9,7 @@ import { developerKeyRoutes } from './modules/developer-keys/developer-keys.rout
 import { accountRoutes } from './modules/account/account.routes.js'
 import { transactionRoutes } from './modules/transaction/transaction.routes.js'
 import { walletAddressRoutes } from './modules/wallet-addresses/wallet-address.routes.js'
+import { workspaceRoutes } from './modules/workspaces/workspace.routes.js'
 
 export function buildApp() {
   const app = Fastify({
@@ -26,6 +27,7 @@ export function buildApp() {
   app.register(accountRoutes)
   app.register(transactionRoutes)
   app.register(walletAddressRoutes)
+  app.register(workspaceRoutes)
 
   return app
 }
@@ -47,3 +49,4 @@ function installJsonParser(app: FastifyInstance) {
     }
   )
 }
+

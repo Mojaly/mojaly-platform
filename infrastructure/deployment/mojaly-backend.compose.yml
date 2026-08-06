@@ -2,7 +2,7 @@ services:
   core:
     image: ghcr.io/mojaly/mojaly-core:latest
     env_file:
-      - ../../services/core/.env.production
+      - ../../services/core/.env
     ports:
       - "5050:5050"
     restart: unless-stopped
@@ -10,7 +10,7 @@ services:
   partner-adapter:
     image: ghcr.io/mojaly/mojaly-partner-adapter:latest
     env_file:
-      - ../../services/partner-adapter/.env.production
+      - ../../services/partner-adapter/.env
     environment:
       MOJALY_CORE_URL: http://core:5050
     ports:
@@ -22,7 +22,7 @@ services:
   api-gateway:
     image: ghcr.io/mojaly/mojaly-api-gateway:latest
     env_file:
-      - ../../services/api-gateway/.env.production
+      - ../../services/api-gateway/.env
     environment:
       CORE_API_URL: http://core:5050
       PORT: 5060
@@ -31,3 +31,4 @@ services:
     depends_on:
       - core
     restart: unless-stopped
+

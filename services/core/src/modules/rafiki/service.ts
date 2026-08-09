@@ -101,7 +101,7 @@ async function handleIncomingPaymentCompleted(data: IncomingPaymentCompletedData
     }
   }
 
-  const intent = getPaymentIntentById(paymentReference)
+  const intent = await getPaymentIntentById(paymentReference)
 
   if (!intent) {
     return {
@@ -162,7 +162,7 @@ async function handleOutgoingPaymentCreated(
     }
   }
 
-  const intent = getPaymentIntentById(paymentReference)
+  const intent = await getPaymentIntentById(paymentReference)
 
   if (!intent) {
     await rafikiClient.cancelOutgoingPayment({
@@ -220,7 +220,7 @@ async function handleOutgoingPaymentCreated(
       reason: 'Insufficient funds'
     })
 
-    updateTransactionStatus(transaction.id, {
+    await updateTransactionStatus(transaction.id, {
       status: 'FAILED',
       description: 'Cancelled because partner-backed balance was insufficient'
     })
@@ -257,7 +257,7 @@ async function handleOutgoingPaymentCompleted(
   data: OutgoingPaymentCompletedData,
   rafikiClient: RafikiClient
 ) {
-  const transaction = findTransactionByPaymentId(data.id)
+  const transaction = await findTransactionByPaymentId(data.id)
 
   if (!transaction) {
     return {
@@ -304,7 +304,7 @@ async function handleOutgoingPaymentCompleted(
     transactionUpdates.partnerReference = adapterPayoutId
   }
 
-  const updatedTransaction = updateTransactionStatus(
+  const updatedTransaction = await updateTransactionStatus(
     transaction.id,
     transactionUpdates
   )
@@ -324,7 +324,7 @@ async function handleOutgoingPaymentFailed(
   data: OutgoingPaymentFailedData,
   rafikiClient: RafikiClient
 ) {
-  const transaction = findTransactionByPaymentId(data.id)
+  const transaction = await findTransactionByPaymentId(data.id)
 
   if (!transaction) {
     return {
@@ -375,7 +375,7 @@ async function handleOutgoingPaymentFailed(
     transactionUpdates.partnerReference = adapterPayoutId
   }
 
-  const updatedTransaction = updateTransactionStatus(
+  const updatedTransaction = await updateTransactionStatus(
     transaction.id,
     transactionUpdates
   )

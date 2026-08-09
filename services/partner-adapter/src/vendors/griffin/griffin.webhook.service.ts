@@ -38,7 +38,7 @@ export async function handleGriffinWebhookEvent(event: GriffinWebhookEvent) {
     }
   }
 
-  const payout = getPayoutByPartnerReference(submissionUrl)
+  const payout = await getPayoutByPartnerReference(submissionUrl)
 
   if (!payout) {
     return {
@@ -64,7 +64,7 @@ export async function handleGriffinWebhookEvent(event: GriffinWebhookEvent) {
     updates.failureReason = failureReason
   }
 
-  const updatedPayout = updatePayout(payout.id, updates) ?? payout
+  const updatedPayout = (await updatePayout(payout.id, updates)) ?? payout
 
   await notifyCore(updatedPayout)
 

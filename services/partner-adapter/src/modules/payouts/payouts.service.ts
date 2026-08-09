@@ -35,23 +35,23 @@ export async function createPayout(input: CreatePayoutInput): Promise<Payout> {
     payout.customerName = input.customerName
   }
 
-  savePayout(payout)
+  await savePayout(payout)
 
   const partner = getPartner(input.partnerCode)
 
   if (!partner) {
     return (
-      updatePayout(payout.id, {
+      (await updatePayout(payout.id, {
         status: 'FAILED',
         failureReason: `Partner ${input.partnerCode} is not registered`
-      }) ?? payout
+      })) ?? payout
     )
   }
 
   const submittedPayout =
-    updatePayout(payout.id, {
+    (await updatePayout(payout.id, {
       status: 'SUBMITTED_TO_PARTNER'
-    }) ?? payout
+    })) ?? payout
 
   const partnerResult = await partner.createPayout(submittedPayout)
 
@@ -64,21 +64,21 @@ export async function createPayout(input: CreatePayoutInput): Promise<Payout> {
     partnerUpdates.failureReason = partnerResult.failureReason
   }
 
-  return updatePayout(payout.id, partnerUpdates) ?? payout
+  return (await updatePayout(payout.id, partnerUpdates)) ?? payout
 }
 
-export function findPayout(id: string): Payout | undefined {
+export async function findPayout(id: string): Promise<Payout | undefined> {
   return getPayoutById(id)
 }
 
-export function findPayouts(): Payout[] {
+export async function findPayouts(): Promise<Payout[]> {
   return listPayouts()
 }
 
 export async function refreshPayoutStatus(
   id: string
 ): Promise<Payout | undefined> {
-  const payout = getPayoutById(id)
+  const payout = await getPayoutById(id)
 
   if (!payout) return undefined
 
@@ -96,5 +96,5 @@ export async function refreshPayoutStatus(
     updates.failureReason = partnerResult.failureReason
   }
 
-  return updatePayout(id, updates) ?? payout
+  return (await updatePayout(id, updates)) ?? payout
 }

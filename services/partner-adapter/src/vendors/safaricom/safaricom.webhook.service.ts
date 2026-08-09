@@ -20,7 +20,7 @@ export async function handleSafaricomB2cResult(
     }
   }
 
-  const payout = getPayoutByPartnerReference(partnerReference)
+  const payout = await getPayoutByPartnerReference(partnerReference)
 
   if (!payout) {
     return {
@@ -39,7 +39,7 @@ export async function handleSafaricomB2cResult(
     updates.failureReason = callback.Result.ResultDesc
   }
 
-  const updatedPayout = updatePayout(payout.id, updates) ?? payout
+  const updatedPayout = (await updatePayout(payout.id, updates)) ?? payout
 
   await notifyCore(updatedPayout)
 

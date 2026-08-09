@@ -1,7 +1,7 @@
 ﻿import { handlePartnerPayoutStatus } from '../payment-processing/payment-processing.service.js'
 import type { PartnerPayoutCallbackInput } from './partner-payout-callbacks.schemas.js'
 
-export function handlePartnerPayoutCallback(input: PartnerPayoutCallbackInput) {
+export async function handlePartnerPayoutCallback(input: PartnerPayoutCallbackInput) {
   const statusInput: {
     paymentIntentId: string
     adapterPayoutId: string
@@ -17,5 +17,5 @@ export function handlePartnerPayoutCallback(input: PartnerPayoutCallbackInput) {
     statusInput.failureReason = input.failureReason
   }
 
-  return handlePartnerPayoutStatus(statusInput)
+  return await handlePartnerPayoutStatus(statusInput)
 }

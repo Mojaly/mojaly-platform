@@ -36,10 +36,13 @@ services:
     env_file:
       - ../../services/partner-adapter/.env
     environment:
+      DATABASE_URL: postgres://${MOJALY_POSTGRES_USER:-mojaly}:${MOJALY_POSTGRES_PASSWORD:-mojaly_change_me}@postgres:5432/${MOJALY_POSTGRES_DB:-mojaly}
       MOJALY_CORE_URL: http://core:5050
     ports:
       - "5070:5070"
     depends_on:
+      postgres:
+        condition: service_healthy
       core:
         condition: service_started
     restart: unless-stopped

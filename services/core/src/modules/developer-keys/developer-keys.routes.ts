@@ -69,7 +69,7 @@ export const developerKeyRoutes: FastifyPluginAsync = async (app) => {
     }
 
     return reply.send({
-      data: listDeveloperKeys(result.data.workspaceId)
+      data: await listDeveloperKeys(result.data.workspaceId)
     })
   })
 
@@ -92,7 +92,7 @@ export const developerKeyRoutes: FastifyPluginAsync = async (app) => {
 
       try {
         return reply.send({
-          data: listDeveloperKeysForWallet(
+          data: await listDeveloperKeysForWallet(
             result.data.workspaceId,
             result.data.walletAddressId
           )

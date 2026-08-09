@@ -4,6 +4,7 @@ import { getWalletAddress } from '../wallet-addresses/wallet-address.service.js'
 import { generateJwk } from '../../utils/jwk.js'
 import {
   getDeveloperKeyById,
+  listDeveloperKeysByWalletAddress,
   listDeveloperKeysByWorkspace,
   saveDeveloperKey,
   updateDeveloperKey
@@ -18,7 +19,7 @@ import type {
 export async function createDeveloperKey(
   input: CreateDeveloperKeyInput
 ): Promise<CreateDeveloperKeyResult> {
-  const walletAddress = assertWalletAddressBelongsToWorkspace(
+  const walletAddress = await assertWalletAddressBelongsToWorkspace(
     input.walletAddressId,
     input.workspaceId
   )
@@ -54,7 +55,7 @@ export async function createDeveloperKey(
     updatedAt: now
   }
 
-  saveDeveloperKey(developerKey)
+  await saveDeveloperKey(developerKey)
 
   return {
     key: developerKey,
@@ -65,27 +66,25 @@ export async function createDeveloperKey(
   }
 }
 
-export function listDeveloperKeys(workspaceId: string): DeveloperKey[] {
+export async function listDeveloperKeys(workspaceId: string): Promise<DeveloperKey[]> {
   return listDeveloperKeysByWorkspace(workspaceId)
 }
 
-export function listDeveloperKeysForWallet(
+export async function listDeveloperKeysForWallet(
   workspaceId: string,
   walletAddressId: string
-): DeveloperKey[] {
-  assertWalletAddressBelongsToWorkspace(walletAddressId, workspaceId)
+): Promise<DeveloperKey[]> {
+  await assertWalletAddressBelongsToWorkspace(walletAddressId, workspaceId)
 
-  return listDeveloperKeysByWorkspace(workspaceId).filter(
-    (key) => key.walletAddressId === walletAddressId
-  )
+  return listDeveloperKeysByWalletAddress(walletAddressId)
 }
 
 export async function revokeDeveloperKey(
   input: RevokeDeveloperKeyInput
 ): Promise<DeveloperKey | undefined> {
-  assertWalletAddressBelongsToWorkspace(input.walletAddressId, input.workspaceId)
+  await assertWalletAddressBelongsToWorkspace(input.walletAddressId, input.workspaceId)
 
-  const key = getDeveloperKeyById(input.keyId)
+  const key = await getDeveloperKeyById(input.keyId)
 
   if (
     !key ||
@@ -107,11 +106,11 @@ export async function revokeDeveloperKey(
   })
 }
 
-function assertWalletAddressBelongsToWorkspace(
+async function assertWalletAddressBelongsToWorkspace(
   walletAddressId: string,
   workspaceId: string
 ) {
-  const walletAddress = getWalletAddress(walletAddressId)
+  const walletAddress = await getWalletAddress(walletAddressId)
 
   if (!walletAddress) {
     throw new Error('WALLET_ADDRESS_NOT_FOUND')

@@ -11,3 +11,4 @@ Planned documents:
 - ERD notes
 - Rafiki integration notes
 - demo flow
+- [frontend console API contract](./frontend-console-api-contract.md)

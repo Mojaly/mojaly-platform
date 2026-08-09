@@ -18,10 +18,10 @@ export class PartnerRouteNotFoundError extends Error {
   }
 }
 
-export function resolvePartnerRoute(
+export async function resolvePartnerRoute(
   input: ResolvePartnerRouteInput
-): PartnerRoute {
-  const route = findPartnerRoute(input)
+): Promise<PartnerRoute> {
+  const route = await findPartnerRoute(input)
 
   if (!route) {
     throw new PartnerRouteNotFoundError(input)

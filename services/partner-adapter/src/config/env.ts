@@ -8,6 +8,10 @@ const envSchema = z.object({
 
   PORT: z.coerce.number().int().positive().default(5070),
 
+  DATABASE_URL: z
+    .string()
+    .default('postgres://mojaly:mojaly_change_me@localhost:5433/mojaly'),
+
   MOJALY_CORE_URL: z
     .url()
     .default('http://localhost:5050'),

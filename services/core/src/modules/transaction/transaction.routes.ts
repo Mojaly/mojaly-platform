@@ -47,7 +47,7 @@ export const transactionRoutes: FastifyPluginAsync = async (app) => {
 
   app.get('/transactions', async () => {
     return {
-      data: getTransactions()
+      data: await getTransactions()
     }
   })
 
@@ -64,7 +64,7 @@ export const transactionRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    const transaction = getTransaction(result.data.id)
+    const transaction = await getTransaction(result.data.id)
 
     if (!transaction) {
       return reply.code(404).send({
@@ -93,7 +93,7 @@ export const transactionRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    const transaction = updateTransactionStatus(paramsResult.data.id, bodyResult.data)
+    const transaction = await updateTransactionStatus(paramsResult.data.id, bodyResult.data)
 
     if (!transaction) {
       return reply.code(404).send({
@@ -123,7 +123,7 @@ export const transactionRoutes: FastifyPluginAsync = async (app) => {
     }
 
     return {
-      data: getAccountTransactions(result.data.accountId)
+      data: await getAccountTransactions(result.data.accountId)
     }
   })
 }

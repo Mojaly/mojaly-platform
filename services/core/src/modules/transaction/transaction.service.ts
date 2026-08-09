@@ -21,7 +21,7 @@ export async function createTransaction(input: CreateTransactionInput): Promise<
     throw new Error('ACCOUNT_NOT_FOUND')
   }
 
-  const existing = findTransactionByPaymentId(input.paymentId)
+  const existing = await findTransactionByPaymentId(input.paymentId)
 
   if (existing) {
     return existing
@@ -61,27 +61,27 @@ export async function createTransaction(input: CreateTransactionInput): Promise<
   return saveTransaction(transaction)
 }
 
-export function getTransaction(id: string): Transaction | undefined {
+export async function getTransaction(id: string): Promise<Transaction | undefined> {
   return getTransactionById(id)
 }
 
-export function getTransactions(): Transaction[] {
+export async function getTransactions(): Promise<Transaction[]> {
   return listTransactions()
 }
 
-export function getAccountTransactions(accountId: string): Transaction[] {
+export async function getAccountTransactions(accountId: string): Promise<Transaction[]> {
   return listTransactionsByAccount(accountId)
 }
 
-export function getPaymentIntentTransactions(paymentIntentId: string): Transaction[] {
+export async function getPaymentIntentTransactions(paymentIntentId: string): Promise<Transaction[]> {
   return listTransactionsByPaymentIntent(paymentIntentId)
 }
 
-export function updateTransactionStatus(
+export async function updateTransactionStatus(
   id: string,
   input: UpdateTransactionStatusInput
-): Transaction | undefined {
-  const transaction = getTransactionById(id)
+): Promise<Transaction | undefined> {
+  const transaction = await getTransactionById(id)
 
   if (!transaction) {
     return undefined

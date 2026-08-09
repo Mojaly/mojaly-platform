@@ -10,13 +10,13 @@ import {
 export const payoutsRoutes: FastifyPluginAsync = async (app) => {
   app.get('/payouts', async () => {
     return {
-      data: findPayouts()
+      data: await findPayouts()
     }
   })
 
   app.get('/payouts/:id', async (request, reply) => {
     const params = request.params as { id: string }
-    const payout = findPayout(params.id)
+    const payout = await findPayout(params.id)
 
     if (!payout) {
       return reply.code(404).send({

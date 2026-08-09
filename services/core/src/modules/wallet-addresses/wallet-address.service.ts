@@ -51,11 +51,11 @@ export async function createWalletAddress(
 
   const url = buildWalletAddressUrl(account.partnerCode, input.walletAddressName)
 
-  if (getWalletAddressByUrl(url)) {
+  if (await getWalletAddressByUrl(url)) {
     throw new Error('WALLET_ADDRESS_ALREADY_EXISTS')
   }
 
-  const partner = findRoutingPartnerByAdapterCode(account.partnerCode)
+  const partner = await findRoutingPartnerByAdapterCode(account.partnerCode)
 
   if (!partner) {
     throw new Error('PARTNER_ROUTE_NOT_FOUND')
@@ -88,25 +88,25 @@ export async function createWalletAddress(
   return saveWalletAddress(walletAddress)
 }
 
-export function getWalletAddress(id: string): WalletAddress | undefined {
+export async function getWalletAddress(id: string): Promise<WalletAddress | undefined> {
   return getWalletAddressById(id)
 }
 
-export function getWalletAddresses(): WalletAddress[] {
+export async function getWalletAddresses(): Promise<WalletAddress[]> {
   return listWalletAddresses()
 }
 
-export function getAccountWalletAddresses(accountId: string): WalletAddress[] {
+export async function getAccountWalletAddresses(accountId: string): Promise<WalletAddress[]> {
   return listWalletAddressesByAccount(accountId)
 }
 
-export function getWorkspaceWalletAddresses(
+export async function getWorkspaceWalletAddresses(
   workspaceId: string
-): WalletAddress[] {
+): Promise<WalletAddress[]> {
   return listWalletAddressesByWorkspace(workspaceId)
 }
 
-export function getFintechWalletAddresses(fintechId: string): WalletAddress[] {
+export async function getFintechWalletAddresses(fintechId: string): Promise<WalletAddress[]> {
   return listWalletAddressesByFintech(fintechId)
 }
 

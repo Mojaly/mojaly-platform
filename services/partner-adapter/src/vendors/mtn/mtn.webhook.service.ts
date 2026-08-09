@@ -12,7 +12,7 @@ export async function handleMtnTransferCallback(
   referenceId: string,
   callback: MtnTransferCallback
 ) {
-  const payout = getPayoutByPartnerReference(referenceId)
+  const payout = await getPayoutByPartnerReference(referenceId)
 
   if (!payout) {
     return {
@@ -31,7 +31,7 @@ export async function handleMtnTransferCallback(
     updates.failureReason = callback.reason
   }
 
-  const updatedPayout = updatePayout(payout.id, updates) ?? payout
+  const updatedPayout = (await updatePayout(payout.id, updates)) ?? payout
 
   await notifyCore(updatedPayout)
 

@@ -26,7 +26,7 @@ export const partnerPayoutCallbackRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    const callbackResult = handlePartnerPayoutCallback(result.data)
+    const callbackResult = await handlePartnerPayoutCallback(result.data)
 
     return reply.code(200).send({
       data: callbackResult

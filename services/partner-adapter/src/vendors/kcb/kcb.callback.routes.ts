@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from 'fastify'
 import { getPayoutByReference, updatePayout } from '../../modules/payouts/payouts.store.js'
 import { kcbCallbackSchema } from './kcb.callback.schemas.js'
 import type { Payout } from '../../modules/payouts/payout.types.js'
+import { saveWebhookEvent } from '../../modules/webhook-events/webhook-event.store.js'
 
 export const kcbCallbackRoutes: FastifyPluginAsync = async (app) => {
   app.post('/webhooks/kcb', async (request, reply) => {
@@ -18,7 +19,16 @@ export const kcbCallbackRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const callback = result.data
-    const payout = getPayoutByReference(callback.transactionReference)
+    await saveWebhookEvent({
+      source: 'KCB',
+      eventType: 'funds-transfer-callback',
+      externalEventId: callback.ftReference ?? callback.transactionReference,
+      signatureVerified: false,
+      payload: callback,
+      handlingStatus: 'RECEIVED'
+    })
+
+    const payout = await getPayoutByReference(callback.transactionReference)
 
     if (!payout) {
       return reply.code(404).send({
@@ -30,10 +40,30 @@ export const kcbCallbackRoutes: FastifyPluginAsync = async (app) => {
     }
 
     const payoutUpdates: Partial<Omit<Payout, 'id' | 'createdAt'>> = {
-    status: callback.transactionStatus === 'SUCCESS' ? 'COMPLETED' : 'FAILED'
+      status: callback.transactionStatus === 'SUCCESS' ? 'COMPLETED' : 'FAILED',
+      partnerReference: callback.transactionReference
     }
+
+    if (callback.transactionMessage) {
+      payoutUpdates.failureReason = callback.transactionMessage
+    }
+
+    const updatedPayout = (await updatePayout(payout.id, payoutUpdates)) ?? payout
+
+    await saveWebhookEvent({
+      source: 'KCB',
+      eventType: 'funds-transfer-callback',
+      externalEventId: callback.ftReference ?? callback.transactionReference,
+      partnerPayoutId: updatedPayout.id,
+      paymentIntentId: updatedPayout.paymentId,
+      signatureVerified: false,
+      payload: callback,
+      handlingStatus: updatedPayout.status === 'FAILED' ? 'FAILED' : 'HANDLED',
+      failureReason: updatedPayout.failureReason
+    })
+
     return {
-      data: payoutUpdates
+      data: updatedPayout
     }
   })
 }

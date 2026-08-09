@@ -112,7 +112,7 @@ export const walletAddressRoutes: FastifyPluginAsync = async (app) => {
   )
 
   app.get('/wallet-addresses', async () => {
-    return { data: getWalletAddresses() }
+    return { data: await getWalletAddresses() }
   })
 
   app.get('/wallet-addresses/:id', async (request, reply) => {
@@ -128,7 +128,7 @@ export const walletAddressRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    const walletAddress = getWalletAddress(result.data.id)
+    const walletAddress = await getWalletAddress(result.data.id)
 
     if (!walletAddress) {
       return reply.code(404).send({
@@ -155,7 +155,7 @@ export const walletAddressRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    return { data: getAccountWalletAddresses(result.data.accountId) }
+    return { data: await getAccountWalletAddresses(result.data.accountId) }
   })
 
   app.get('/workspaces/:workspaceId/wallet-addresses', async (request, reply) => {
@@ -171,7 +171,7 @@ export const walletAddressRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    return { data: getWorkspaceWalletAddresses(result.data.workspaceId) }
+    return { data: await getWorkspaceWalletAddresses(result.data.workspaceId) }
   })
 
   app.get('/fintechs/:fintechId/wallet-addresses', async (request, reply) => {
@@ -187,6 +187,6 @@ export const walletAddressRoutes: FastifyPluginAsync = async (app) => {
       })
     }
 
-    return { data: getFintechWalletAddresses(result.data.fintechId) }
+    return { data: await getFintechWalletAddresses(result.data.fintechId) }
   })
 }

@@ -1,3 +1,4 @@
+import { query } from '../../db/postgres.js'
 import type {
   PartnerCapability,
   PartnerRoute,
@@ -5,170 +6,205 @@ import type {
   RoutingPartner
 } from './partner-routing.types.js'
 
-const partners = new Map<string, RoutingPartner>([
-  [
-    'partner_mtn_ug',
-    {
-      id: 'partner_mtn_ug',
-      code: 'MTN_UG',
-      name: 'MTN Uganda',
-      status: 'ACTIVE',
-      rafikiTenantId: 'f854ad9b-1e81-4d5d-8a4e-fd63fa277f10',
-      adapterCode: 'MTN_UG'
-    }
-  ],
-  [
-    'partner_griffin',
-    {
-      id: 'partner_griffin',
-      code: 'GRIFFIN',
-      name: 'Griffin',
-      status: 'ACTIVE',
-      rafikiTenantId: '12d0d40f-0f7c-4a51-974b-d04debfe6a20',
-      adapterCode: 'GRIFFIN'
-    }
-  ],
-  [
-    'partner_safaricom_ke',
-    {
-      id: 'partner_safaricom_ke',
-      code: 'SAFARICOM_KE',
-      name: 'Safaricom M-Pesa Kenya',
-      status: 'ACTIVE',
-      rafikiTenantId: 'replace-with-safaricom-tenant-id',
-      adapterCode: 'SAFARICOM_KE'
-    }
-  ]
-])
-
-const capabilities = new Map<string, PartnerCapability>([
-  [
-    'capability_mtn_ug_mobile_money_ugx',
-    {
-      id: 'capability_mtn_ug_mobile_money_ugx',
-      partnerId: 'partner_mtn_ug',
-      country: 'UG',
-      destinationType: 'mobile_money',
-      network: 'MTN',
-      assetCode: 'UGX',
-      status: 'ACTIVE'
-    }
-  ],
-  [
-    'capability_griffin_bank_gbp',
-    {
-      id: 'capability_griffin_bank_gbp',
-      partnerId: 'partner_griffin',
-      country: 'GB',
-      destinationType: 'bank_account',
-      assetCode: 'GBP',
-      status: 'ACTIVE'
-    }
-  ],
-  [
-    'capability_safaricom_ke_mobile_money_kes',
-    {
-      id: 'capability_safaricom_ke_mobile_money_kes',
-      partnerId: 'partner_safaricom_ke',
-      country: 'KE',
-      destinationType: 'mobile_money',
-      network: 'SAFARICOM',
-      assetCode: 'KES',
-      status: 'ACTIVE'
-    }
-  ]
-])
-
-const walletAddresses = new Map<string, PartnerWalletAddress>([
-  [
-    'wallet_mtn_ug_settlement',
-    {
-      id: 'wallet_mtn_ug_settlement',
-      partnerId: 'partner_mtn_ug',
-      capabilityId: 'capability_mtn_ug_mobile_money_ugx',
-      walletAddressUrl: 'https://mojaly.local/mtn-ug/settlement',
-      purpose: 'SETTLEMENT',
-      status: 'ACTIVE'
-    }
-  ],
-  [
-    'wallet_griffin_settlement',
-    {
-      id: 'wallet_griffin_settlement',
-      partnerId: 'partner_griffin',
-      capabilityId: 'capability_griffin_bank_gbp',
-      walletAddressUrl: 'https://mojaly.local/griffin/settlement',
-      purpose: 'SETTLEMENT',
-      status: 'ACTIVE'
-    }
-  ],
-  [
-    'wallet_safaricom_ke_settlement',
-    {
-      id: 'wallet_safaricom_ke_settlement',
-      partnerId: 'partner_safaricom_ke',
-      capabilityId: 'capability_safaricom_ke_mobile_money_kes',
-      walletAddressUrl: 'https://mojaly.local/safaricom-ke/settlement',
-      purpose: 'SETTLEMENT',
-      status: 'ACTIVE'
-    }
-  ]
-])
-
-export function listRoutingPartners(): RoutingPartner[] {
-  return Array.from(partners.values())
+type RoutingPartnerRow = {
+  id: string
+  code: string
+  name: string
+  status: RoutingPartner['status']
+  rafiki_tenant_id: string
+  adapter_code: string
 }
 
+type PartnerCapabilityRow = {
+  id: string
+  partner_id: string
+  country: string
+  destination_type: PartnerCapability['destinationType']
+  network: string | null
+  asset_code: string
+  status: PartnerCapability['status']
+}
 
-export function findRoutingPartnerByAdapterCode(
-  adapterCode: string
-): RoutingPartner | undefined {
-  return Array.from(partners.values()).find(
-    (partner) => partner.adapterCode === adapterCode && partner.status === 'ACTIVE'
+type PartnerWalletAddressRow = {
+  id: string
+  partner_id: string
+  capability_id: string
+  wallet_address_url: string
+  purpose: PartnerWalletAddress['purpose']
+  status: PartnerWalletAddress['status']
+}
+
+type PartnerRouteRow = RoutingPartnerRow &
+  PartnerCapabilityRow &
+  PartnerWalletAddressRow & {
+    partner_id: string
+    partner_code: string
+    partner_name: string
+    partner_status: RoutingPartner['status']
+    capability_id: string
+    capability_status: PartnerCapability['status']
+    wallet_address_id: string
+    wallet_address_status: PartnerWalletAddress['status']
+  }
+
+function mapPartner(row: RoutingPartnerRow): RoutingPartner {
+  return {
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    status: row.status,
+    rafikiTenantId: row.rafiki_tenant_id,
+    adapterCode: row.adapter_code
+  }
+}
+
+function mapCapability(row: PartnerCapabilityRow): PartnerCapability {
+  const capability: PartnerCapability = {
+    id: row.id,
+    partnerId: row.partner_id,
+    country: row.country,
+    destinationType: row.destination_type,
+    assetCode: row.asset_code,
+    status: row.status
+  }
+
+  if (row.network) {
+    capability.network = row.network
+  }
+
+  return capability
+}
+
+function mapWalletAddress(row: PartnerWalletAddressRow): PartnerWalletAddress {
+  return {
+    id: row.id,
+    partnerId: row.partner_id,
+    capabilityId: row.capability_id,
+    walletAddressUrl: row.wallet_address_url,
+    purpose: row.purpose,
+    status: row.status
+  }
+}
+
+export async function listRoutingPartners(): Promise<RoutingPartner[]> {
+  const result = await query<RoutingPartnerRow>(
+    'SELECT * FROM routing_partners ORDER BY created_at DESC'
   )
-}
-export function listPartnerCapabilities(): PartnerCapability[] {
-  return Array.from(capabilities.values())
+
+  return result.rows.map(mapPartner)
 }
 
-export function listPartnerWalletAddresses(): PartnerWalletAddress[] {
-  return Array.from(walletAddresses.values())
+export async function findRoutingPartnerByAdapterCode(
+  adapterCode: string
+): Promise<RoutingPartner | undefined> {
+  const result = await query<RoutingPartnerRow>(
+    `
+      SELECT * FROM routing_partners
+      WHERE adapter_code = $1 AND status = 'ACTIVE'
+      LIMIT 1
+    `,
+    [adapterCode]
+  )
+
+  const row = result.rows[0]
+  return row ? mapPartner(row) : undefined
 }
 
-export function findPartnerRoute(input: {
+export async function listPartnerCapabilities(): Promise<PartnerCapability[]> {
+  const result = await query<PartnerCapabilityRow>(
+    'SELECT * FROM partner_capabilities ORDER BY created_at DESC'
+  )
+
+  return result.rows.map(mapCapability)
+}
+
+export async function listPartnerWalletAddresses(): Promise<PartnerWalletAddress[]> {
+  const result = await query<PartnerWalletAddressRow>(
+    'SELECT * FROM partner_wallet_addresses ORDER BY created_at DESC'
+  )
+
+  return result.rows.map(mapWalletAddress)
+}
+
+export async function findPartnerRoute(input: {
   country: string
   destinationType: string
   network?: string
   assetCode: string
-}): PartnerRoute | undefined {
-  for (const capability of capabilities.values()) {
-    if (capability.status !== 'ACTIVE') continue
-    if (capability.country !== input.country) continue
-    if (capability.destinationType !== input.destinationType) continue
-    if (capability.assetCode !== input.assetCode) continue
+}): Promise<PartnerRoute | undefined> {
+  const result = await query<PartnerRouteRow>(
+    `
+      SELECT
+        partner.id,
+        partner.code,
+        partner.name,
+        partner.status,
+        partner.rafiki_tenant_id,
+        partner.adapter_code,
+        partner.id AS partner_id,
+        partner.code AS partner_code,
+        partner.name AS partner_name,
+        partner.status AS partner_status,
+        capability.id AS capability_id,
+        capability.country,
+        capability.destination_type,
+        capability.network,
+        capability.asset_code,
+        capability.status AS capability_status,
+        wallet.id AS wallet_address_id,
+        wallet.wallet_address_url,
+        wallet.purpose,
+        wallet.status AS wallet_address_status
+      FROM partner_capabilities capability
+      JOIN routing_partners partner ON partner.id = capability.partner_id
+      JOIN partner_wallet_addresses wallet
+        ON wallet.partner_id = partner.id
+       AND wallet.capability_id = capability.id
+      WHERE capability.country = $1
+        AND capability.destination_type = $2
+        AND capability.asset_code = $3
+        AND capability.status = 'ACTIVE'
+        AND partner.status = 'ACTIVE'
+        AND wallet.status = 'ACTIVE'
+        AND wallet.purpose = 'SETTLEMENT'
+        AND (capability.network IS NULL OR capability.network = $4)
+      ORDER BY capability.created_at ASC
+      LIMIT 1
+    `,
+    [input.country, input.destinationType, input.assetCode, input.network ?? null]
+  )
 
-    if (capability.network && capability.network !== input.network) continue
+  const row = result.rows[0]
 
-    const partner = partners.get(capability.partnerId)
-
-    if (!partner || partner.status !== 'ACTIVE') continue
-
-    const walletAddress = Array.from(walletAddresses.values()).find(
-      (item) =>
-        item.partnerId === partner.id &&
-        item.capabilityId === capability.id &&
-        item.status === 'ACTIVE' &&
-        item.purpose === 'SETTLEMENT'
-    )
-
-    if (!walletAddress) continue
-
-    return {
-      partner,
-      capability,
-      walletAddress
-    }
+  if (!row) {
+    return undefined
   }
 
-  return undefined
+  return {
+    partner: {
+      id: row.partner_id,
+      code: row.partner_code,
+      name: row.partner_name,
+      status: row.partner_status,
+      rafikiTenantId: row.rafiki_tenant_id,
+      adapterCode: row.adapter_code
+    },
+    capability: {
+      id: row.capability_id,
+      partnerId: row.partner_id,
+      country: row.country,
+      destinationType: row.destination_type,
+      ...(row.network ? { network: row.network } : {}),
+      assetCode: row.asset_code,
+      status: row.capability_status
+    },
+    walletAddress: {
+      id: row.wallet_address_id,
+      partnerId: row.partner_id,
+      capabilityId: row.capability_id,
+      walletAddressUrl: row.wallet_address_url,
+      purpose: row.purpose,
+      status: row.wallet_address_status
+    }
+  }
 }

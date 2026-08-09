@@ -81,7 +81,7 @@ export async function createDestinationResolution(
 ): Promise<PaymentIntent> {
   const now = new Date().toISOString()
   const id = randomUUID()
-  const route = resolvePartnerRoute(createRouteInput(input))
+  const route = await resolvePartnerRoute(createRouteInput(input))
 
   await assertSpendCapacity({
     fintechId: input.fintechId,
@@ -105,7 +105,7 @@ export async function createDestinationResolution(
     expiresAt: getExpiresAt()
   }
 
-  return savePaymentIntent(intent)
+  return await savePaymentIntent(intent)
 }
 
 async function assertSpendCapacity(input: {

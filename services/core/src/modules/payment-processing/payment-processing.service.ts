@@ -16,7 +16,7 @@ export interface PartnerPayoutStatusInput {
 }
 
 export async function handleFundingConfirmed(paymentReference: string) {
-  const intent = getPaymentIntentById(paymentReference)
+  const intent = await getPaymentIntentById(paymentReference)
 
   if (!intent) {
     return {
@@ -34,7 +34,7 @@ export async function handleFundingConfirmed(paymentReference: string) {
     }
   }
 
-  const fundedIntent = updatePaymentIntent(intent.id, {
+  const fundedIntent = await updatePaymentIntent(intent.id, {
     status: 'FUNDED'
   })
 
@@ -56,7 +56,7 @@ export async function handleInterledgerPaymentCompleted(
   paymentReference: string,
   payoutAmount?: PaymentAmount
 ) {
-  const intent = getPaymentIntentById(paymentReference)
+  const intent = await getPaymentIntentById(paymentReference)
 
   if (!intent) {
     return {
@@ -98,7 +98,7 @@ export async function handleInterledgerPaymentCompleted(
         failedPayload.failureReason = failureReason
       }
 
-      const failedIntent = updatePaymentIntent(intent.id, failedPayload)
+      const failedIntent = await updatePaymentIntent(intent.id, failedPayload)
 
       return {
         handled: true,
@@ -121,7 +121,7 @@ export async function handleInterledgerPaymentCompleted(
       updatePayload.adapterPayoutId = adapterPayoutId
     }
 
-    const updatedIntent = updatePaymentIntent(intent.id, updatePayload)
+    const updatedIntent = await updatePaymentIntent(intent.id, updatePayload)
 
     return {
       handled: true,
@@ -130,7 +130,7 @@ export async function handleInterledgerPaymentCompleted(
       adapterPayoutId
     }
   } catch (error) {
-    const failedIntent = updatePaymentIntent(intent.id, {
+    const failedIntent = await updatePaymentIntent(intent.id, {
       status: 'FAILED',
       failureReason:
         error instanceof Error ? error.message : 'Partner payout failed'
@@ -146,7 +146,7 @@ export async function handleInterledgerPaymentCompleted(
 }
 
 export async function retryPartnerPayout(paymentIntentId: string) {
-  const intent = getPaymentIntentById(paymentIntentId)
+  const intent = await getPaymentIntentById(paymentIntentId)
 
   if (!intent) {
     return {
@@ -187,7 +187,7 @@ export async function retryPartnerPayout(paymentIntentId: string) {
         failedPayload.failureReason = failureReason
       }
 
-      const failedIntent = updatePaymentIntent(intent.id, failedPayload)
+      const failedIntent = await updatePaymentIntent(intent.id, failedPayload)
 
       return {
         handled: true,
@@ -210,7 +210,7 @@ export async function retryPartnerPayout(paymentIntentId: string) {
       updatePayload.adapterPayoutId = adapterPayoutId
     }
 
-    const updatedIntent = updatePaymentIntent(intent.id, updatePayload)
+    const updatedIntent = await updatePaymentIntent(intent.id, updatePayload)
 
     return {
       handled: true,
@@ -219,7 +219,7 @@ export async function retryPartnerPayout(paymentIntentId: string) {
       adapterPayoutId
     }
   } catch (error) {
-    const failedIntent = updatePaymentIntent(intent.id, {
+    const failedIntent = await updatePaymentIntent(intent.id, {
       status: 'FAILED',
       failureReason:
         error instanceof Error ? error.message : 'Partner payout retry failed'
@@ -234,8 +234,8 @@ export async function retryPartnerPayout(paymentIntentId: string) {
   }
 }
 
-export function handlePartnerPayoutStatus(input: PartnerPayoutStatusInput) {
-  const intent = getPaymentIntentById(input.paymentIntentId)
+export async function handlePartnerPayoutStatus(input: PartnerPayoutStatusInput) {
+  const intent = await getPaymentIntentById(input.paymentIntentId)
 
   if (!intent) {
     return {
@@ -265,7 +265,7 @@ export function handlePartnerPayoutStatus(input: PartnerPayoutStatusInput) {
   }
 
   if (input.status === 'COMPLETED') {
-    const completedIntent = updatePaymentIntent(intent.id, {
+    const completedIntent = await updatePaymentIntent(intent.id, {
       status: 'COMPLETED'
     })
 
@@ -276,7 +276,7 @@ export function handlePartnerPayoutStatus(input: PartnerPayoutStatusInput) {
     }
   }
 
-  const failedIntent = updatePaymentIntent(intent.id, {
+  const failedIntent = await updatePaymentIntent(intent.id, {
     status: 'FAILED',
     failureReason: input.failureReason ?? 'Partner payout failed'
   })

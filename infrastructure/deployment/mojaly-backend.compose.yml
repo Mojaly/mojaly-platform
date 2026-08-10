@@ -42,6 +42,9 @@ services:
       NODE_TLS_REJECT_UNAUTHORIZED: ${NODE_TLS_REJECT_UNAUTHORIZED:-0}
     ports:
       - "${CORE_HOST_PORT:-5050}:${CORE_PORT:-5050}"
+    networks:
+      - default
+      - mojaly-auth
     depends_on:
       postgres:
         condition: service_healthy
@@ -116,3 +119,6 @@ services:
 
 volumes:
   mojaly-postgres-data:
+networks:
+  mojaly-auth:
+    external: true

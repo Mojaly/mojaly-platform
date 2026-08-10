@@ -10,7 +10,7 @@ services:
       - mojaly-postgres-data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
     ports:
-      - '127.0.0.1:5433:5432'
+      - '${MOJALY_POSTGRES_HOST:-127.0.0.1}:${MOJALY_POSTGRES_PORT:-5433}:5432'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${MOJALY_POSTGRES_USER:-mojaly} -d ${MOJALY_POSTGRES_DB:-mojaly}"]
       interval: 5s
@@ -19,27 +19,80 @@ services:
     restart: unless-stopped
 
   core:
-    image: ghcr.io/mojaly/mojaly-core:latest
-    env_file:
-      - ../../services/core/.env
+    image: ${CORE_IMAGE:-ghcr.io/mojaly/mojaly-core:latest}
+    container_name: mojaly-core
     environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${CORE_PORT:-5050}
       DATABASE_URL: postgres://${MOJALY_POSTGRES_USER:-mojaly}:${MOJALY_POSTGRES_PASSWORD:-mojaly_change_me}@postgres:5432/${MOJALY_POSTGRES_DB:-mojaly}
+      PARTNER_ADAPTER_URL: ${PARTNER_ADAPTER_URL:-http://partner-adapter:${PARTNER_ADAPTER_PORT:-5070}}
+      PARTNER_ADAPTER_INTERNAL_API_KEY: ${PARTNER_ADAPTER_INTERNAL_API_KEY:-dev_partner_adapter_internal_key}
+      MOJALY_OPEN_PAYMENTS_HOST: ${MOJALY_OPEN_PAYMENTS_HOST:-https://pay.mojaly.local}
+      MOJALY_WALLET_ADDRESS_BASE_URL: ${MOJALY_WALLET_ADDRESS_BASE_URL:-https://pay.mojaly.local}
+      RAFIKI_BACKEND_GRAPHQL_URL: ${RAFIKI_BACKEND_GRAPHQL_URL:-https://mojaly.local/graphql}
+      RAFIKI_AUTH_GRAPHQL_URL: ${RAFIKI_AUTH_GRAPHQL_URL:-https://auth.mojaly.local/graphql}
+      RAFIKI_AUTH_DOMAIN: ${RAFIKI_AUTH_DOMAIN:-https://auth.mojaly.local}
+      RAFIKI_OPERATOR_TENANT_ID: ${RAFIKI_OPERATOR_TENANT_ID:-replace-me}
+      RAFIKI_ADMIN_API_SECRET: ${RAFIKI_ADMIN_API_SECRET:-secret-key}
+      RAFIKI_ADMIN_SIGNATURE_VERSION: ${RAFIKI_ADMIN_SIGNATURE_VERSION:-1}
+      RAFIKI_AUTH_IDENTITY_SERVER_SECRET: ${RAFIKI_AUTH_IDENTITY_SERVER_SECRET:-dev_identity_server_secret}
+      RAFIKI_WEBHOOK_SIGNATURE_SECRET: ${RAFIKI_WEBHOOK_SIGNATURE_SECRET:-dev_rafiki_webhook_signature_secret}
+      KRATOS_PUBLIC_URL: ${KRATOS_PUBLIC_URL:-http://host.docker.internal:4433}
+      KRATOS_ADMIN_URL: ${KRATOS_ADMIN_URL:-http://host.docker.internal:4434}
+      NODE_TLS_REJECT_UNAUTHORIZED: ${NODE_TLS_REJECT_UNAUTHORIZED:-0}
     ports:
-      - "5050:5050"
+      - "${CORE_HOST_PORT:-5050}:${CORE_PORT:-5050}"
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
 
   partner-adapter:
-    image: ghcr.io/mojaly/mojaly-partner-adapter:latest
-    env_file:
-      - ../../services/partner-adapter/.env
+    image: ${PARTNER_ADAPTER_IMAGE:-ghcr.io/mojaly/mojaly-partner-adapter:latest}
+    container_name: mojaly-partner-adapter
     environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PARTNER_ADAPTER_PORT:-5070}
       DATABASE_URL: postgres://${MOJALY_POSTGRES_USER:-mojaly}:${MOJALY_POSTGRES_PASSWORD:-mojaly_change_me}@postgres:5432/${MOJALY_POSTGRES_DB:-mojaly}
-      MOJALY_CORE_URL: http://core:5050
+      MOJALY_CORE_URL: ${MOJALY_CORE_URL:-http://core:${CORE_PORT:-5050}}
+      PARTNER_ADAPTER_INTERNAL_API_KEY: ${PARTNER_ADAPTER_INTERNAL_API_KEY:-dev_partner_adapter_internal_key}
+      KCB_BASE_URL: ${KCB_BASE_URL:-https://uat.buni.kcbgroup.com/fundstransfer/1.0.0}
+      KCB_AUTH_URL: ${KCB_AUTH_URL:-https://accounts.buni.kcbgroup.com/oauth2}
+      KCB_CONSUMER_KEY: ${KCB_CONSUMER_KEY:-}
+      KCB_CONSUMER_SECRET: ${KCB_CONSUMER_SECRET:-}
+      KCB_COMPANY_CODE: ${KCB_COMPANY_CODE:-}
+      KCB_DEBIT_ACCOUNT_NUMBER: ${KCB_DEBIT_ACCOUNT_NUMBER:-}
+      KCB_TRANSACTION_TYPE: ${KCB_TRANSACTION_TYPE:-}
+      KCB_CURRENCY: ${KCB_CURRENCY:-KES}
+      KCB_CALLBACK_URL: ${KCB_CALLBACK_URL:-}
+      STB_BASE_URL: ${STB_BASE_URL:-https://sandbox.connect.stanbicbank.co.ke/api/sandbox/eft-payments}
+      STB_AUTH_URL: ${STB_AUTH_URL:-https://sandbox.connect.stanbicbank.co.ke/api/sandbox/auth/oauth2/token}
+      STB_KEY: ${STB_KEY:-}
+      STB_SECRET: ${STB_SECRET:-}
+      GRIFFIN_BASE_URL: ${GRIFFIN_BASE_URL:-https://api.griffin.com}
+      GRIFFIN_API_KEY: ${GRIFFIN_API_KEY:-}
+      GRIFFIN_LEGAL_PERSON_ID: ${GRIFFIN_LEGAL_PERSON_ID:-}
+      GRIFFIN_BANK_ACCOUNT_ID: ${GRIFFIN_BANK_ACCOUNT_ID:-}
+      GRIFFIN_PAYMENT_SCHEME: ${GRIFFIN_PAYMENT_SCHEME:-fps}
+      GRIFFIN_VERIFY_WEBHOOK_SIGNATURES: ${GRIFFIN_VERIFY_WEBHOOK_SIGNATURES:-true}
+      MTN_BASE_URL: ${MTN_BASE_URL:-https://sandbox.momodeveloper.mtn.com}
+      MTN_SUBSCRIPTION_KEY: ${MTN_SUBSCRIPTION_KEY:-}
+      MTN_API_USER: ${MTN_API_USER:-}
+      MTN_API_KEY: ${MTN_API_KEY:-}
+      MTN_TARGET_ENVIRONMENT: ${MTN_TARGET_ENVIRONMENT:-sandbox}
+      MTN_CALLBACK_URL: ${MTN_CALLBACK_URL:-}
+      MTN_TRANSFER_TYPE: ${MTN_TRANSFER_TYPE:-}
+      SAFARICOM_BASE_URL: ${SAFARICOM_BASE_URL:-https://sandbox.safaricom.co.ke}
+      SAFARICOM_CONSUMER_KEY: ${SAFARICOM_CONSUMER_KEY:-}
+      SAFARICOM_CONSUMER_SECRET: ${SAFARICOM_CONSUMER_SECRET:-}
+      SAFARICOM_INITIATOR_NAME: ${SAFARICOM_INITIATOR_NAME:-}
+      SAFARICOM_SECURITY_CREDENTIAL: ${SAFARICOM_SECURITY_CREDENTIAL:-}
+      SAFARICOM_SHORTCODE: ${SAFARICOM_SHORTCODE:-}
+      SAFARICOM_B2C_COMMAND_ID: ${SAFARICOM_B2C_COMMAND_ID:-BusinessPayment}
+      SAFARICOM_RESULT_URL: ${SAFARICOM_RESULT_URL:-}
+      SAFARICOM_TIMEOUT_URL: ${SAFARICOM_TIMEOUT_URL:-}
     ports:
-      - "5070:5070"
+      - "${PARTNER_ADAPTER_HOST_PORT:-5070}:${PARTNER_ADAPTER_PORT:-5070}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -48,14 +101,14 @@ services:
     restart: unless-stopped
 
   api-gateway:
-    image: ghcr.io/mojaly/mojaly-api-gateway:latest
-    env_file:
-      - ../../services/api-gateway/.env
+    image: ${API_GATEWAY_IMAGE:-ghcr.io/mojaly/mojaly-api-gateway:latest}
+    container_name: mojaly-api-gateway
     environment:
-      CORE_API_URL: http://core:5050
-      PORT: 5060
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${API_GATEWAY_PORT:-5060}
+      CORE_API_URL: ${CORE_API_URL:-http://core:${CORE_PORT:-5050}}
     ports:
-      - "5060:5060"
+      - "${API_GATEWAY_HOST_PORT:-5060}:${API_GATEWAY_PORT:-5060}"
     depends_on:
       core:
         condition: service_started
@@ -63,4 +116,3 @@ services:
 
 volumes:
   mojaly-postgres-data:
-

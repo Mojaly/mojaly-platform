@@ -10,6 +10,7 @@ import { accountRoutes } from './modules/account/account.routes.js'
 import { transactionRoutes } from './modules/transaction/transaction.routes.js'
 import { walletAddressRoutes } from './modules/wallet-addresses/wallet-address.routes.js'
 import { workspaceRoutes } from './modules/workspaces/workspace.routes.js'
+import { authRoutes } from './modules/auth/auth.routes.js'
 
 export function buildApp() {
   const app = Fastify({
@@ -28,6 +29,7 @@ export function buildApp() {
   app.register(transactionRoutes)
   app.register(walletAddressRoutes)
   app.register(workspaceRoutes)
+  app.register(authRoutes)
 
   return app
 }

@@ -1,0 +1,34 @@
+meta {
+  name: Testnet peering
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://pay.mojaly.com/graphql
+  body: json
+  auth: inherit
+}
+
+headers {
+  tenant-id: {{rafiki_operator_tenant_id}}
+  signature: t=1786341078859, v1=54977c4b2715a0a9854c6ab76c360e72177e8c8158b21647ee460a4ba582a1ba
+}
+
+body:json {
+  {
+    "query": "mutation CreateOrUpdatePeerByUrl($input: CreateOrUpdatePeerByUrlInput!) { createOrUpdatePeerByUrl(input: $input) { peer { id name staticIlpAddress asset { id code scale withdrawalThreshold } http { incoming { authTokens } outgoing { endpoint authToken } } } } }",
+    "variables": {
+      "input": {
+        "peerUrl": "https://autopeer.interledger-test.dev",
+        "assetId": "201a1239-89b4-41d1-b656-b36746e85dd3",
+        "liquidityToDeposit": "10000"
+      }
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

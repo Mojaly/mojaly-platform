@@ -1,0 +1,15 @@
+meta {
+  name: Create Login Flow
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{kratos_public_url}}/self-service/login/api
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Submit Registration
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{kratos_registration_action}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "method": "password",
+    "traits.email": "founder@janjapay.test",
+    "traits.name": "Janja Founder",
+    "password": "TestPassword123!"
+  }
+}

@@ -56,7 +56,15 @@ const envSchema = z.object({
 
   MOJALY_OPEN_PAYMENTS_HOST: z
     .url()
-    .default('https://mojaly.local')
+    .default('https://mojaly.local'),
+
+  KRATOS_PUBLIC_URL: z
+    .url()
+    .default('http://localhost:4433'),
+
+  KRATOS_ADMIN_URL: z
+    .url()
+    .default('http://localhost:4434')
 })
 
 export type Env = z.infer<typeof envSchema>

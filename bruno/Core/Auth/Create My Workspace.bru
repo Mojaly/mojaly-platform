@@ -1,0 +1,26 @@
+meta {
+  name: Create My Workspace
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{core_base_url}}/auth/workspaces
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+  X-Session-Token: {{kratos_session_token}}
+}
+
+body:json {
+  {
+    "businessName": "JanjaPay Limited",
+    "tradingName": "JanjaPay",
+    "businessType": "fintech",
+    "country": "KE"
+  }
+}

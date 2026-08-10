@@ -1,0 +1,24 @@
+meta {
+  name: Submit Login
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{kratos_login_action}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "method": "password",
+    "identifier": "founder@janjapay.test",
+    "password": "TestPassword123!"
+  }
+}

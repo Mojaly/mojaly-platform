@@ -1,0 +1,16 @@
+meta {
+  name: Get Me
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{core_base_url}}/auth/me
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  X-Session-Token: {{kratos_session_token}}
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Create Workspace Account - Safaricom KES
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{core_base_url}}/workspaces/{{workspace_id}}/accounts
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "JanjaPay Safaricom KES",
+    "partnerCode": "SAFARICOM_KE",
+    "externalPartnerAccountId": "{{safaricom_external_account_id}}",
+    "assetCode": "KES"
+  }
+}

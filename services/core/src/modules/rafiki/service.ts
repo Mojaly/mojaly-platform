@@ -140,9 +140,18 @@ async function handleIncomingPaymentCompleted(data: IncomingPaymentCompletedData
   })
 
   const fundingResult = await handleFundingConfirmed(paymentReference)
+  const partnerPayoutResult = await handleInterledgerPaymentCompleted(
+    paymentReference,
+    {
+      value: String(data.receivedAmount.value),
+      assetCode: data.receivedAmount.assetCode,
+      assetScale: data.receivedAmount.assetScale
+    }
+  )
 
   return {
     ...fundingResult,
+    partnerPayout: partnerPayoutResult,
     transactionId: transaction.id,
     accountId: account.id
   }

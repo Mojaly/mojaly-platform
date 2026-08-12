@@ -23,5 +23,5 @@ export type CreateAccountInput = {
   externalPartnerAccountId: string
   rafikiAssetId?: string | undefined
   assetCode: string
-  assetScale: number
+  assetScale?: number | undefined
 }

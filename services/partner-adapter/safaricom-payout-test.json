@@ -1,0 +1,11 @@
+{
+  "paymentId": "safaricom-demo-001",
+  "partnerCode": "SAFARICOM_KE",
+  "amount": "100",
+  "assetCode": "KES",
+  "assetScale": 2,
+  "destinationType": "mobile_money",
+  "destinationAccount": "254708374149",
+  "reference": "Mojaly Safaricom demo",
+  "customerName": "Demo Customer"
+}

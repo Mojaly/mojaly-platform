@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const createPayoutSchema = z.object({
   paymentId: z.string().min(1),
   partnerCode: z.string().min(1),
+  sourceExternalAccountId: z.string().min(1).optional(),
   amount: z.string().regex(/^\d+$/),
   assetCode: z.string().min(3).max(10),
   assetScale: z.number().int().min(0),

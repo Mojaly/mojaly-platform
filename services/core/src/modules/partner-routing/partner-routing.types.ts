@@ -30,6 +30,39 @@ export interface PartnerWalletAddress {
   status: RoutingStatus
 }
 
+export type PartnerAccountType = 'bank_account' | 'mobile_money'
+
+export interface PartnerSupportedAsset {
+  id: string
+  partnerId: string
+  partnerCode: string
+  partnerName: string
+  assetCode: string
+  assetScale: number
+  rafikiAssetId: string
+  accountType: PartnerAccountType
+  status: RoutingStatus
+}
+
+export interface PartnerAccountLinkOptionAsset {
+  assetCode: string
+  assetScale: number
+  label: string
+}
+
+export interface PartnerAccountLinkOption {
+  partnerCode: string
+  partnerName: string
+  accountType: PartnerAccountType
+  assets: PartnerAccountLinkOptionAsset[]
+  fields: Array<{
+    name: string
+    label: string
+    placeholder: string
+    required: boolean
+  }>
+}
+
 export interface PartnerRoute {
   partner: RoutingPartner
   capability: PartnerCapability

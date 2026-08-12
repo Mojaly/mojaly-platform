@@ -1,0 +1,15 @@
+meta {
+  name: List Account Link Options
+  type: http
+  seq: 0
+}
+
+get {
+  url: {{core_base_url}}/workspaces/{{workspace_id}}/account-link-options
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}

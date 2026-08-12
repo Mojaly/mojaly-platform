@@ -83,7 +83,7 @@ export async function createDestinationResolution(
   const id = randomUUID()
   const route = await resolvePartnerRoute(createRouteInput(input))
 
-  await assertSpendCapacity({
+  const sourceAccount = await assertSpendCapacity({
     fintechId: input.fintechId,
     partnerCode: route.partner.adapterCode,
     assetCode: input.amount.assetCode,
@@ -93,7 +93,9 @@ export async function createDestinationResolution(
 
   const intent: PaymentIntent = {
     id,
+    workspaceId: sourceAccount.workspaceId,
     fintechId: input.fintechId,
+    accountId: sourceAccount.id,
     partnerCode: route.partner.adapterCode,
     destination: createPaymentDestination(input),
     amount: input.amount,
@@ -133,6 +135,8 @@ async function assertSpendCapacity(input: {
   if (BigInt(available) < BigInt(input.requiredAmount)) {
     throw new InsufficientSpendCapacityError(available, input.requiredAmount)
   }
+
+  return account
 }
 
 function extractAvailableBalance(balance: unknown): string {

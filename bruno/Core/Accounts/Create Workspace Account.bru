@@ -1,7 +1,7 @@
 meta {
-  name: Create Workspace Account
+  name: Create Workspace Account - Griffin GBP
   type: http
-  seq: 6
+  seq: 1
 }
 
 post {
@@ -19,9 +19,7 @@ body:json {
   {
     "name": "JanjaPay Griffin GBP",
     "partnerCode": "GRIFFIN",
-    "externalPartnerAccountId": "ba.O3MN5dnrUBmCdfMbJcHS0w",
-    "rafikiAssetId": "c69e69bf-5d39-4ca0-a955-26301aaf01ac",
-    "assetCode": "GBP",
-    "assetScale": 2
+    "externalPartnerAccountId": "{{griffin_external_account_id}}",
+    "assetCode": "GBP"
   }
 }

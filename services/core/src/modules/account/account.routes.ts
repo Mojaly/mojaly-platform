@@ -12,6 +12,7 @@ import {
   getAccountBalance,
   getAccounts,
   getFintechAccounts,
+  getWorkspaceAccountLinkOptions,
   getWorkspaceAccounts
 } from './account.service.js'
 
@@ -24,7 +25,8 @@ function mapAccountError(error: unknown, reply: FastifyReply) {
     ACCOUNT_WORKSPACE_REQUIRED: 400,
     WORKSPACE_NOT_FOUND: 404,
     WORKSPACE_NOT_ACTIVE: 409,
-    ACCOUNT_NOT_FOUND: 404
+    ACCOUNT_NOT_FOUND: 404,
+    PARTNER_ASSET_NOT_FOUND: 404
   }
 
   const statusCode = statusByCode[error.message]
@@ -88,6 +90,28 @@ export const accountRoutes: FastifyPluginAsync = async (app) => {
           workspaceId: params.data.workspaceId
         })
       })
+    } catch (error) {
+      return mapAccountError(error, reply)
+    }
+  })
+
+  app.get('/workspaces/:workspaceId/account-link-options', async (request, reply) => {
+    const result = workspaceAccountsParamsSchema.safeParse(request.params)
+
+    if (!result.success) {
+      return reply.code(400).send({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid workspace id',
+          details: result.error.flatten()
+        }
+      })
+    }
+
+    try {
+      return {
+        data: await getWorkspaceAccountLinkOptions(result.data.workspaceId)
+      }
     } catch (error) {
       return mapAccountError(error, reply)
     }

@@ -1,5 +1,13 @@
-import { findPartnerRoute } from './partner-routing.store.js'
-import type { PartnerRoute } from './partner-routing.types.js'
+import {
+  findPartnerRoute,
+  findPartnerSupportedAsset,
+  listPartnerSupportedAssets
+} from './partner-routing.store.js'
+import type {
+  PartnerAccountLinkOption,
+  PartnerRoute,
+  PartnerSupportedAsset
+} from './partner-routing.types.js'
 
 export interface ResolvePartnerRouteInput {
   country: string
@@ -18,6 +26,13 @@ export class PartnerRouteNotFoundError extends Error {
   }
 }
 
+export class PartnerSupportedAssetNotFoundError extends Error {
+  constructor(input: { partnerCode: string; assetCode: string }) {
+    super(`No active supported asset found for ${input.partnerCode} ${input.assetCode}`)
+    this.name = 'PartnerSupportedAssetNotFoundError'
+  }
+}
+
 export async function resolvePartnerRoute(
   input: ResolvePartnerRouteInput
 ): Promise<PartnerRoute> {
@@ -28,4 +43,75 @@ export async function resolvePartnerRoute(
   }
 
   return route
+}
+
+export async function resolvePartnerSupportedAsset(input: {
+  partnerCode: string
+  assetCode: string
+}): Promise<PartnerSupportedAsset> {
+  const asset = await findPartnerSupportedAsset(input)
+
+  if (!asset) {
+    throw new PartnerSupportedAssetNotFoundError(input)
+  }
+
+  return asset
+}
+
+export async function getPartnerAccountLinkOptions(): Promise<
+  PartnerAccountLinkOption[]
+> {
+  const assets = await listPartnerSupportedAssets()
+  const optionsByPartner = new Map<string, PartnerAccountLinkOption>()
+
+  for (const asset of assets) {
+    const existing = optionsByPartner.get(asset.partnerCode)
+
+    if (existing) {
+      existing.assets.push({
+        assetCode: asset.assetCode,
+        assetScale: asset.assetScale,
+        label: `${asset.assetCode} account`
+      })
+      continue
+    }
+
+    optionsByPartner.set(asset.partnerCode, {
+      partnerCode: asset.partnerCode,
+      partnerName: asset.partnerName,
+      accountType: asset.accountType,
+      assets: [
+        {
+          assetCode: asset.assetCode,
+          assetScale: asset.assetScale,
+          label: `${asset.assetCode} account`
+        }
+      ],
+      fields: getAccountLinkFields(asset.partnerCode)
+    })
+  }
+
+  return Array.from(optionsByPartner.values())
+}
+
+function getAccountLinkFields(partnerCode: string): PartnerAccountLinkOption['fields'] {
+  if (partnerCode === 'GRIFFIN') {
+    return [
+      {
+        name: 'externalPartnerAccountId',
+        label: 'Griffin bank account ID',
+        placeholder: 'ba.xxxxx',
+        required: true
+      }
+    ]
+  }
+
+  return [
+    {
+      name: 'externalPartnerAccountId',
+      label: 'Partner account ID',
+      placeholder: 'Enter partner account reference',
+      required: true
+    }
+  ]
 }

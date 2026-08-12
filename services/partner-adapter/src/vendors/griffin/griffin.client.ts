@@ -1,4 +1,4 @@
-﻿import axios from 'axios'
+import axios from 'axios'
 import { env } from '../../config/env.js'
 import type {
   PartnerAdapter,
@@ -32,7 +32,7 @@ export class GriffinClient implements PartnerAdapter {
         'GRIFFIN_LEGAL_PERSON_ID',
         env.GRIFFIN_LEGAL_PERSON_ID
       )
-      const bankAccountId = requireConfig(
+      const bankAccountId = payout.sourceExternalAccountId ?? requireConfig(
         'GRIFFIN_BANK_ACCOUNT_ID',
         env.GRIFFIN_BANK_ACCOUNT_ID
       )

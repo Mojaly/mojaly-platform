@@ -90,6 +90,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS partner_capabilities_unique_idx
 CREATE INDEX IF NOT EXISTS partner_capabilities_lookup_idx
   ON partner_capabilities (country, destination_type, COALESCE(network, ''), asset_code, status);
 
+CREATE TABLE IF NOT EXISTS partner_supported_assets (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  partner_id uuid NOT NULL REFERENCES routing_partners(id) ON DELETE CASCADE,
+  asset_code text NOT NULL,
+  asset_scale integer NOT NULL CHECK (asset_scale >= 0 AND asset_scale <= 18),
+  rafiki_asset_id uuid NOT NULL,
+  account_type text NOT NULL CHECK (account_type IN ('bank_account', 'mobile_money')),
+  status text NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (partner_id, asset_code)
+);
+
+CREATE INDEX IF NOT EXISTS partner_supported_assets_lookup_idx
+  ON partner_supported_assets (partner_id, asset_code, status);
+
 CREATE TABLE IF NOT EXISTS partner_wallet_addresses (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   partner_id uuid NOT NULL REFERENCES routing_partners(id) ON DELETE CASCADE,

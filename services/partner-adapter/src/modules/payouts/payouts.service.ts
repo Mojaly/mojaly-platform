@@ -27,6 +27,10 @@ export async function createPayout(input: CreatePayoutInput): Promise<Payout> {
     updatedAt: now
   }
 
+  if (input.sourceExternalAccountId) {
+    payout.sourceExternalAccountId = input.sourceExternalAccountId
+  }
+
   if (input.destinationBankCode) {
     payout.destinationBankCode = input.destinationBankCode
   }
@@ -53,7 +57,13 @@ export async function createPayout(input: CreatePayoutInput): Promise<Payout> {
       status: 'SUBMITTED_TO_PARTNER'
     })) ?? payout
 
-  const partnerResult = await partner.createPayout(submittedPayout)
+  const payoutForPartner: Payout = { ...submittedPayout }
+
+  if (payout.sourceExternalAccountId) {
+    payoutForPartner.sourceExternalAccountId = payout.sourceExternalAccountId
+  }
+
+  const partnerResult = await partner.createPayout(payoutForPartner)
 
   const partnerUpdates: Partial<Omit<Payout, 'id' | 'createdAt'>> = {
     status: partnerResult.status,

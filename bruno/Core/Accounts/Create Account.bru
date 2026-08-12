@@ -1,7 +1,7 @@
 meta {
-  name: Create Account
+  name: Legacy Create Account
   type: http
-  seq: 1
+  seq: 99
 }
 
 post {
@@ -17,11 +17,11 @@ headers {
 
 body:json {
   {
-    "fintechId": "janjapay-01",
+    "fintechId": "{{fintech_id}}",
     "name": "JanjaPay Griffin GBP",
     "partnerCode": "GRIFFIN",
-    "externalPartnerAccountId": "ba.O3MN5dnrUBmCdfMbJcHS0w",
-    "rafikiAssetId": "c69e69bf-5d39-4ca0-a955-26301aaf01ac",
+    "externalPartnerAccountId": "{{griffin_external_account_id}}",
+    "rafikiAssetId": "{{griffin_rafiki_asset_id}}",
     "assetCode": "GBP",
     "assetScale": 2
   }

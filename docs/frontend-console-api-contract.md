@@ -186,6 +186,89 @@ The frontend should filter global activity by workspace where the backend respon
 
 Accounts represent fintech balances backed by partner accounts.
 
+The frontend should treat account creation as an account-linking flow. It should ask Core for the available account-link partners/assets, then submit only business-level values. Rafiki asset IDs are resolved by Core and should not be editable in the console.
+
+### List Account Link Options
+
+`GET /workspaces/:workspaceId/account-link-options`
+
+Used by:
+
+- Create account form
+- Balances empty state
+- Onboarding next-step card after approval
+
+Response:
+
+```json
+{
+  "data": [
+    {
+      "partnerCode": "GRIFFIN",
+      "partnerName": "Griffin",
+      "accountType": "bank_account",
+      "assets": [
+        {
+          "assetCode": "GBP",
+          "assetScale": 2,
+          "label": "GBP account"
+        }
+      ],
+      "fields": [
+        {
+          "name": "externalPartnerAccountId",
+          "label": "Griffin bank account ID",
+          "placeholder": "ba.xxxxx",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+Frontend rule:
+
+- Do not ask the user for `rafikiAssetId`.
+- Do not send `rafikiAssetId` or `assetScale` from the create-account form.
+- Only show partners returned by this endpoint.
+
+### Create Workspace Account
+
+`POST /workspaces/:workspaceId/accounts`
+
+Request:
+
+```json
+{
+  "name": "JanjaPay Griffin GBP",
+  "partnerCode": "GRIFFIN",
+  "assetCode": "GBP",
+  "externalPartnerAccountId": "ba.O3MN5dnrUBmCdfMbJcHS0w"
+}
+```
+
+Response:
+
+```json
+{
+  "data": {
+    "id": "account-id",
+    "workspaceId": "workspace-id",
+    "fintechId": "workspace-id",
+    "name": "JanjaPay Griffin GBP",
+    "partnerCode": "GRIFFIN",
+    "externalPartnerAccountId": "ba.O3MN5dnrUBmCdfMbJcHS0w",
+    "assetCode": "GBP",
+    "assetScale": 2,
+    "rafikiAssetId": "resolved-by-core",
+    "status": "ACTIVE",
+    "createdAt": "2026-08-08T00:00:00.000Z",
+    "updatedAt": "2026-08-08T00:00:00.000Z"
+  }
+}
+```
+
 ### List Workspace Accounts
 
 `GET /workspaces/:workspaceId/accounts`
@@ -601,15 +684,20 @@ Response:
 ```json
 {
   "data": {
-    "paymentIntentId": "payment-intent-id",
+    "id": "payment-intent-id",
     "walletAddress": "https://mojaly.local/griffin/settlement",
-    "paymentReference": "payment-intent-id",
-    "partnerCode": "GRIFFIN",
-    "status": "RESOLVED",
+    "metadata": {
+      "paymentReference": "payment-intent-id"
+    },
     "expiresAt": "2026-08-08T00:10:00.000Z"
   }
 }
 ```
+
+Frontend/docs rule:
+
+- Pass `metadata` into the Open Payments SDK payment flow.
+- Mojaly uses `paymentReference` from Rafiki webhook metadata to match the funded payment to the correct payment intent and trigger partner payout.
 
 ## Screen To Endpoint Map
 
@@ -617,7 +705,7 @@ Response:
 | --- | --- |
 | Onboarding | `POST /workspaces`, `POST /workspaces/:workspaceId/submit-kyb`, `GET /workspaces/:workspaceId`, `GET /workspaces/:workspaceId/kyb` |
 | Home | `GET /workspaces/:workspaceId`, `GET /workspaces/:workspaceId/accounts`, `GET /workspaces/:workspaceId/wallet-addresses`, `GET /workspaces/:workspaceId/developer-keys`, `GET /payment-intents` |
-| Balances | `GET /workspaces/:workspaceId/accounts`, `GET /accounts/:accountId/balance`, `GET /accounts/:accountId/transactions` |
+| Balances | `GET /workspaces/:workspaceId/account-link-options`, `GET /workspaces/:workspaceId/accounts`, `POST /workspaces/:workspaceId/accounts`, `GET /accounts/:accountId/balance`, `GET /accounts/:accountId/transactions` |
 | Payments | `GET /payment-intents`, `GET /payment-intents/:paymentIntentId` |
 | Quotes | `GET /payment-intents`, `GET /payment-intents/:paymentIntentId` |
 | API Keys | `GET /workspaces/:workspaceId/developer-keys`, `POST /workspaces/:workspaceId/wallet-addresses/:walletAddressId/developer-keys`, `POST /workspaces/:workspaceId/wallet-addresses/:walletAddressId/developer-keys/:keyId/revoke` |

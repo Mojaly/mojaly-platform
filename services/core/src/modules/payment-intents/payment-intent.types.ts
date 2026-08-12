@@ -26,7 +26,9 @@ export interface PaymentAmount {
 
 export interface PaymentIntent {
   id: string
+  workspaceId?: string
   fintechId: string
+  accountId?: string
   partnerCode: string
   destination: PaymentDestination
   amount: PaymentAmount

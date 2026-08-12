@@ -24,11 +24,11 @@ export const destinationResolutionRoutes: FastifyPluginAsync = async (app) => {
 
       return reply.code(201).send({
         data: {
-          paymentIntentId: intent.id,
+          id: intent.id,
           walletAddress: intent.walletAddress,
-          paymentReference: intent.id,
-          partnerCode: intent.partnerCode,
-          status: intent.status,
+          metadata: {
+            paymentReference: intent.id
+          },
           expiresAt: intent.expiresAt
         }
       })

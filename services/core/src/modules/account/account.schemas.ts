@@ -9,6 +9,13 @@ const createAccountBaseSchema = z.object({
   assetScale: z.coerce.number().int().min(0).max(18)
 })
 
+const createWorkspaceAccountBaseSchema = z.object({
+  name: z.string().min(1).max(120),
+  partnerCode: z.string().min(1).max(40),
+  externalPartnerAccountId: z.string().min(1),
+  assetCode: z.string().min(3).max(12)
+})
+
 export const createAccountSchema = createAccountBaseSchema
   .extend({
     workspaceId: z.string().min(1).optional(),
@@ -19,7 +26,7 @@ export const createAccountSchema = createAccountBaseSchema
     path: ['workspaceId']
   })
 
-export const createWorkspaceAccountSchema = createAccountBaseSchema
+export const createWorkspaceAccountSchema = createWorkspaceAccountBaseSchema
 
 export const accountIdParamsSchema = z.object({
   id: z.string().min(1)

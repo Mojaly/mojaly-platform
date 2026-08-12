@@ -70,6 +70,14 @@ function mapPaymentIntent(row: PaymentIntentRow): PaymentIntent {
     expiresAt: toIso(row.expires_at)
   }
 
+  if (row.workspace_id) {
+    intent.workspaceId = row.workspace_id
+  }
+
+  if (row.account_id) {
+    intent.accountId = row.account_id
+  }
+
   if (row.adapter_payout_id) {
     intent.adapterPayoutId = row.adapter_payout_id
   }
@@ -88,7 +96,9 @@ export async function savePaymentIntent(
     `
       INSERT INTO payment_intents (
         id,
+        workspace_id,
         fintech_id,
+        account_id,
         partner_code,
         destination_type,
         destination_country,
@@ -112,10 +122,13 @@ export async function savePaymentIntent(
         $1, $2, $3, $4, $5,
         $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15,
-        $16, $17, $18, $19, $20
+        $16, $17, $18, $19, $20,
+        $21, $22
       )
       ON CONFLICT (id) DO UPDATE SET
+        workspace_id = EXCLUDED.workspace_id,
         fintech_id = EXCLUDED.fintech_id,
+        account_id = EXCLUDED.account_id,
         partner_code = EXCLUDED.partner_code,
         destination_type = EXCLUDED.destination_type,
         destination_country = EXCLUDED.destination_country,
@@ -137,7 +150,9 @@ export async function savePaymentIntent(
     `,
     [
       intent.id,
+      intent.workspaceId ?? null,
       intent.fintechId,
+      intent.accountId ?? null,
       intent.partnerCode,
       intent.destination.type,
       intent.destination.country,

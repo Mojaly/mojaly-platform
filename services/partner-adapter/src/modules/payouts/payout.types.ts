@@ -12,6 +12,7 @@ export interface Payout {
   id: string
   paymentId: string
   partnerCode: string
+  sourceExternalAccountId?: string
   amount: string
   assetCode: string
   assetScale: number

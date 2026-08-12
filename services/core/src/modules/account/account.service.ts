@@ -1,5 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { getPartnerAccountBalance } from '../../clients/partner-adapter.client.js'
+import {
+  getPartnerAccountLinkOptions,
+  PartnerSupportedAssetNotFoundError,
+  resolvePartnerSupportedAsset
+} from '../partner-routing/partner-routing.service.js'
 import { getWorkspace } from '../workspaces/workspace.service.js'
 import {
   getAccountById,
@@ -29,6 +34,14 @@ export async function createAccount(input: CreateAccountInput): Promise<Account>
     }
   }
 
+  const supportedAsset = await resolveSupportedAccountAsset({
+    partnerCode: input.partnerCode,
+    assetCode: input.assetCode
+  })
+
+  const rafikiAssetId = input.rafikiAssetId ?? supportedAsset.rafikiAssetId
+  const assetScale = input.assetScale ?? supportedAsset.assetScale
+
   const now = new Date().toISOString()
 
   const account: Account = {
@@ -40,17 +53,43 @@ export async function createAccount(input: CreateAccountInput): Promise<Account>
     partnerCode: input.partnerCode,
     externalPartnerAccountId: input.externalPartnerAccountId,
     assetCode: input.assetCode,
-    assetScale: input.assetScale,
+    assetScale,
+    rafikiAssetId,
     status: 'ACTIVE',
     createdAt: now,
     updatedAt: now
   }
 
-  if (input.rafikiAssetId) {
-    account.rafikiAssetId = input.rafikiAssetId
+  return saveAccount(account)
+}
+
+async function resolveSupportedAccountAsset(input: {
+  partnerCode: string
+  assetCode: string
+}) {
+  try {
+    return await resolvePartnerSupportedAsset(input)
+  } catch (error) {
+    if (error instanceof PartnerSupportedAssetNotFoundError) {
+      throw new Error('PARTNER_ASSET_NOT_FOUND')
+    }
+
+    throw error
+  }
+}
+
+export async function getWorkspaceAccountLinkOptions(workspaceId: string) {
+  const workspace = await getWorkspace(workspaceId)
+
+  if (!workspace) {
+    throw new Error('WORKSPACE_NOT_FOUND')
   }
 
-  return saveAccount(account)
+  if (workspace.status !== 'ACTIVE') {
+    throw new Error('WORKSPACE_NOT_ACTIVE')
+  }
+
+  return getPartnerAccountLinkOptions()
 }
 
 export async function getAccount(id: string): Promise<Account | undefined> {

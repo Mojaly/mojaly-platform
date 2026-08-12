@@ -1,5 +1,6 @@
-﻿import axios from 'axios'
+import axios from 'axios'
 import { env } from '../config/env.js'
+import { getAccountById } from '../modules/account/account.store.js'
 import type {
   PaymentAmount,
   PaymentIntent
@@ -9,7 +10,7 @@ export async function createPartnerPayout(
   intent: PaymentIntent,
   amountOverride?: PaymentAmount
 ) {
-  const payload = buildPartnerPayoutPayload(intent, amountOverride)
+  const payload = await buildPartnerPayoutPayload(intent, amountOverride)
 
   const response = await axios.post(`${env.PARTNER_ADAPTER_URL}/payouts`, payload, {
     headers: {
@@ -44,7 +45,7 @@ export async function getPartnerAccountBalance(input: {
 
   return response.data
 }
-function buildPartnerPayoutPayload(
+async function buildPartnerPayoutPayload(
   intent: PaymentIntent,
   amountOverride?: PaymentAmount
 ) {
@@ -62,6 +63,7 @@ function buildPartnerPayoutPayload(
     destinationBankCode?: string
     destinationNetwork?: string
     customerName?: string
+    sourceExternalAccountId?: string
   } = {
     paymentId: intent.id,
     partnerCode: intent.partnerCode,
@@ -71,6 +73,14 @@ function buildPartnerPayoutPayload(
     destinationType: intent.destination.type,
     destinationAccount: intent.destination.account,
     reference: intent.reference
+  }
+
+  if (intent.accountId) {
+    const account = await getAccountById(intent.accountId)
+
+    if (account) {
+      payload.sourceExternalAccountId = account.externalPartnerAccountId
+    }
   }
 
   if (intent.destination.bankCode) {

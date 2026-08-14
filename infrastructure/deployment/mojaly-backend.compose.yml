@@ -117,8 +117,21 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  idp:
+    image: ${IDP_IMAGE:-ghcr.io/mojaly/mojaly-idp:latest}
+    container_name: mojaly-idp
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${IDP_PORT:-5080}
+      RAFIKI_AUTH_DOMAIN: ${RAFIKI_AUTH_DOMAIN:-https://auth.mojaly.local}
+      RAFIKI_AUTH_IDENTITY_SERVER_SECRET: ${RAFIKI_AUTH_IDENTITY_SERVER_SECRET:-dev_identity_server_secret}
+      NODE_TLS_REJECT_UNAUTHORIZED: ${NODE_TLS_REJECT_UNAUTHORIZED:-0}
+    ports:
+      - "${IDP_HOST_PORT:-5080}:${IDP_PORT:-5080}"
+    restart: unless-stopped
 volumes:
   mojaly-postgres-data:
 networks:
   mojaly-auth:
     external: true
+

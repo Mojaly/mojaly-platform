@@ -30,6 +30,9 @@ jobs:
           - name: api-gateway
             image: mojaly-api-gateway
             dockerfile: services/api-gateway/Dockerfile
+          - name: idp
+            image: mojaly-idp
+            dockerfile: services/idp/Dockerfile
 
     steps:
       - name: Checkout

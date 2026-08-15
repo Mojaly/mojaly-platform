@@ -246,7 +246,7 @@ async function handleOutgoingPaymentCreated(
     }
   }
 
-  await rafikiClient.depositLiquidity(eventId)
+  await rafikiClient.depositOutgoingPaymentLiquidity(data.id)
 
   return {
     handled: true,

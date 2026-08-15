@@ -25,3 +25,19 @@ export const depositLiquidityMutation = gql`
     }
   }
 `
+
+export const depositOutgoingPaymentLiquidityMutation = gql`
+  mutation DepositOutgoingPaymentLiquidityMutation(
+    $outgoingPaymentId: String!
+    $idempotencyKey: String!
+  ) {
+    depositOutgoingPaymentLiquidity(
+      input: {
+        outgoingPaymentId: $outgoingPaymentId
+        idempotencyKey: $idempotencyKey
+      }
+    ) {
+      success
+    }
+  }
+`

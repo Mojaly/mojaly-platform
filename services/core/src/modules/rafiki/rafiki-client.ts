@@ -58,6 +58,7 @@ import {
 } from './backend/request/asset.request.js'
 import { getIncomingPaymentQuery } from './backend/request/incoming-payment.request.js'
 import {
+  depositOutgoingPaymentLiquidityMutation,
   depositLiquidityMutation,
   withdrawLiquidityMutation
 } from './backend/request/liquidity.request.js'
@@ -98,6 +99,17 @@ type PaymentParams = {
   asset: Pick<Asset, 'code' | 'scale'>
   description?: string
   expiresAt?: Date
+}
+
+type DepositOutgoingPaymentLiquidityMutationResponse = {
+  depositOutgoingPaymentLiquidity?: {
+    success: boolean
+  } | null
+}
+
+type DepositOutgoingPaymentLiquidityMutationVariables = {
+  outgoingPaymentId: string
+  idempotencyKey: string
 }
 
 export type CreateIncomingPaymentParams = {
@@ -221,6 +233,22 @@ export class RafikiClient implements IRafikiClient {
 
     if (!response.depositEventLiquidity?.success) {
       throw new Error('Unable to deposit liquidity to Rafiki')
+    }
+
+    return true
+  }
+
+  public async depositOutgoingPaymentLiquidity(outgoingPaymentId: string) {
+    const response = await this.backendGraphQLClient.request<
+      DepositOutgoingPaymentLiquidityMutationResponse,
+      DepositOutgoingPaymentLiquidityMutationVariables
+    >(depositOutgoingPaymentLiquidityMutation, {
+      outgoingPaymentId,
+      idempotencyKey: uuid()
+    })
+
+    if (!response.depositOutgoingPaymentLiquidity?.success) {
+      throw new Error('Unable to deposit outgoing payment liquidity to Rafiki')
     }
 
     return true

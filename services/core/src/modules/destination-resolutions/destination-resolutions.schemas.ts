@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const createDestinationResolutionSchema = z.object({
-  fintechId: z.string().min(1),
+  fintechId: z.string().min(1).optional(),
 
   destination: z.object({
     type: z.enum(['bank_account', 'mobile_money']),

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { findAccountForFintechPartnerAsset } from '../account/account.store.js'
 import { getAccountBalance } from '../account/account.service.js'
+import type { DeveloperKeyContext } from '../developer-keys/developer-keys.types.js'
 import type { CreateDestinationResolutionInput } from './destination-resolutions.schemas.js'
 import type {
   PaymentDestination,
@@ -27,6 +28,20 @@ export class InsufficientSpendCapacityError extends Error {
   ) {
     super('Insufficient spend capacity')
     this.name = 'InsufficientSpendCapacityError'
+  }
+}
+
+export class FintechIdentityRequiredError extends Error {
+  constructor() {
+    super('fintechId or a verified developer key is required')
+    this.name = 'FintechIdentityRequiredError'
+  }
+}
+
+export class FintechIdentityMismatchError extends Error {
+  constructor() {
+    super('fintechId does not match the verified developer key')
+    this.name = 'FintechIdentityMismatchError'
   }
 }
 
@@ -77,14 +92,16 @@ function createRouteInput(
 }
 
 export async function createDestinationResolution(
-  input: CreateDestinationResolutionInput
+  input: CreateDestinationResolutionInput,
+  context: { developerKey?: DeveloperKeyContext } = {}
 ): Promise<PaymentIntent> {
   const now = new Date().toISOString()
   const id = randomUUID()
   const route = await resolvePartnerRoute(createRouteInput(input))
+  const fintechId = resolveFintechId(input, context.developerKey)
 
   const sourceAccount = await assertSpendCapacity({
-    fintechId: input.fintechId,
+    fintechId,
     partnerCode: route.partner.adapterCode,
     assetCode: input.amount.assetCode,
     assetScale: input.amount.assetScale,
@@ -94,7 +111,7 @@ export async function createDestinationResolution(
   const intent: PaymentIntent = {
     id,
     workspaceId: sourceAccount.workspaceId,
-    fintechId: input.fintechId,
+    fintechId,
     accountId: sourceAccount.id,
     partnerCode: route.partner.adapterCode,
     destination: createPaymentDestination(input),
@@ -108,6 +125,25 @@ export async function createDestinationResolution(
   }
 
   return await savePaymentIntent(intent)
+}
+
+function resolveFintechId(
+  input: CreateDestinationResolutionInput,
+  developerKey?: DeveloperKeyContext
+): string {
+  if (input.fintechId && developerKey && input.fintechId !== developerKey.fintechId) {
+    throw new FintechIdentityMismatchError()
+  }
+
+  if (input.fintechId) {
+    return input.fintechId
+  }
+
+  if (developerKey) {
+    return developerKey.fintechId
+  }
+
+  throw new FintechIdentityRequiredError()
 }
 
 async function assertSpendCapacity(input: {
@@ -177,6 +213,22 @@ export function mapDestinationResolutionError(error: unknown) {
         available: error.available,
         required: error.required
       }
+    }
+  }
+
+  if (error instanceof FintechIdentityRequiredError) {
+    return {
+      statusCode: 401,
+      code: 'FINTECH_IDENTITY_REQUIRED',
+      message: error.message
+    }
+  }
+
+  if (error instanceof FintechIdentityMismatchError) {
+    return {
+      statusCode: 403,
+      code: 'FINTECH_IDENTITY_MISMATCH',
+      message: error.message
     }
   }
 

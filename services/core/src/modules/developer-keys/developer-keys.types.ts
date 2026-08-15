@@ -12,6 +12,15 @@ export type DeveloperKey = {
   updatedAt: string
 }
 
+export type DeveloperKeyContext = {
+  keyId: string
+  workspaceId: string
+  walletAddressId: string
+  accountId: string
+  fintechId: string
+  publicKey: string
+}
+
 export type CreateDeveloperKeyInput = {
   workspaceId: string
   walletAddressId: string

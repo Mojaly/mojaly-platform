@@ -1,5 +1,8 @@
 import { query } from '../../db/postgres.js'
-import type { DeveloperKey } from './developer-keys.types.js'
+import type {
+  DeveloperKey,
+  DeveloperKeyContext
+} from './developer-keys.types.js'
 
 type DeveloperKeyRow = {
   id: string
@@ -82,6 +85,51 @@ export async function getDeveloperKeyById(
   )
   const row = result.rows[0]
   return row ? mapDeveloperKey(row) : undefined
+}
+
+export async function getActiveDeveloperKeyContextById(
+  id: string
+): Promise<DeveloperKeyContext | undefined> {
+  const result = await query<{
+    key_id: string
+    workspace_id: string
+    wallet_address_id: string
+    account_id: string
+    fintech_id: string
+    public_key: string
+  }>(
+    `
+      SELECT
+        key.id AS key_id,
+        key.workspace_id,
+        key.wallet_address_id,
+        key.public_key,
+        wallet.account_id,
+        wallet.fintech_id
+      FROM developer_keys key
+      JOIN wallet_addresses wallet ON wallet.id = key.wallet_address_id
+      WHERE key.id = $1
+        AND key.status = 'ACTIVE'
+        AND wallet.status = 'ACTIVE'
+      LIMIT 1
+    `,
+    [id]
+  )
+
+  const row = result.rows[0]
+
+  if (!row) {
+    return undefined
+  }
+
+  return {
+    keyId: row.key_id,
+    workspaceId: row.workspace_id,
+    walletAddressId: row.wallet_address_id,
+    accountId: row.account_id,
+    fintechId: row.fintech_id,
+    publicKey: row.public_key
+  }
 }
 
 export async function listDeveloperKeysByWorkspace(

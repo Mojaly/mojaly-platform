@@ -13,11 +13,13 @@ post {
 headers {
   Accept: application/json
   Content-Type: application/json
+  x-api-key-id: {{developer_key_id}}
+  x-signature-timestamp: {{signature_timestamp}}
+  x-signature: {{developer_key_signature}}
 }
 
 body:json {
   {
-    "fintechId": "janjapay-01",
     "destination": {
       "type": "bank_account",
       "country": "GB",
